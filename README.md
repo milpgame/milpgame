@@ -1,4 +1,11 @@
 # Milpgame
+
+//********************************************************************/
+//* Copyright (C) 2017                                               */
+//* FILIP CERNATESCU : milpgame at yahoo.com                         */
+//* License terms: MIT-License 	                                     */
+//********************************************************************/
+
 Milpgame is a proof assistant and a checker (it shows a message only something gone wrong) for
  the Metamath language, also it is an open source(MIT License) Java application(cross-platform application:
 Window,Linux,Mac OS).You can enter  the demonstration(proof) in two modes : forward and backward  relative
