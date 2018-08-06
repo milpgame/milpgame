@@ -150,7 +150,7 @@ public class StatementsListWindow extends javax.swing.JDialog {
             a.frame0.currentDemonstrationEditor.S.unifyTemplateAssumptionWithBase
             (a.frame0.currentDemonstrationEditor.
             listOfStatements.get(this.selectedRow).items,
-            a.frame0.currentDemonstrationEditor.selectedDemonstrationItem.items,
+            a.frame0.currentDemonstrationEditor.selectedDemonstrationItem0.items,
              variableAndContent)
            )
         {

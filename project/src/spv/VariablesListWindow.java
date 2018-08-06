@@ -296,13 +296,13 @@ public class VariablesListWindow extends javax.swing.JDialog {
                 {
                  if(a.frame0.currentDemonstrationEditor!=null)
                 {
-                  if(a.frame0.currentDemonstrationEditor.selectedDemonstrationItem!=null)
+                  if(a.frame0.currentDemonstrationEditor.selectedDemonstrationItem0!=null)
                  {
-                   int max=a.frame0.currentDemonstrationEditor.selectedDemonstrationItem.items.size();
+                   int max=a.frame0.currentDemonstrationEditor.selectedDemonstrationItem0.items.size();
                   for(int i2=0;i2<max;i2++)
                   {
                    ConstantAndVariable v_i=a.frame0.currentDemonstrationEditor.
-                                              selectedDemonstrationItem.items.get(i2);
+                                              selectedDemonstrationItem0.items.get(i2);
                    if (v_i.constantOrVariableText.equals(item))
                    {
                     isInStatement=true;

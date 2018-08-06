@@ -45,7 +45,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.jdesktop.application.Application;
-
+import java.util.Collections;
 
 /**
  * The application's main frame.
@@ -225,7 +225,7 @@ public class MainWindow extends FrameView {
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(spv.Application0.class).getContext().getActionMap(MainWindow.class, this);
         aboutButton.setAction(actionMap.get("showAboutBox")); // NOI18N
         aboutButton.setBackground(resourceMap.getColor("bDespre.background")); // NOI18N
-        aboutButton.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        aboutButton.setFont(new java.awt.Font("Tahoma", 1, 11));
         aboutButton.setForeground(new java.awt.Color(255, 255, 255));
         aboutButton.setText(resourceMap.getString("bDespre.text")); // NOI18N
         aboutButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -509,7 +509,7 @@ public class MainWindow extends FrameView {
         
         if (this.currentDemonstrationEditor!=null)
          {
-            if (this.currentDemonstrationEditor.selectedDemonstrationItem!=null)
+            if (this.currentDemonstrationEditor.selectedDemonstrationItem0!=null)
             {
                 this.currentDemonstrationEditor.createBranchAndUpdate();
                 
@@ -551,7 +551,7 @@ public class MainWindow extends FrameView {
     private void branchDeletingButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_branchDeletingButtonActionPerformed
          if (this.currentDemonstrationEditor!=null)
          {
-        if (this.currentDemonstrationEditor.selectedDemonstrationItem!=null)
+        if (this.currentDemonstrationEditor.selectedDemonstrationItem0!=null)
         {
             this.currentDemonstrationEditor.deleteBranchAndUpdateGraph();
            
@@ -590,7 +590,7 @@ public class MainWindow extends FrameView {
         
       if (this.currentDemonstrationEditor!=null)
          {
-            if (this.currentDemonstrationEditor.selectedDemonstrationItem!=null)
+            if (this.currentDemonstrationEditor.selectedDemonstrationItem0!=null)
             {
             if (this.currentDemonstrationEditor.demonstrationStrategyType==1)
                 {
@@ -610,7 +610,7 @@ public class MainWindow extends FrameView {
 
       if (this.currentDemonstrationEditor!=null)
          {
-            if (this.currentDemonstrationEditor.selectedDemonstrationItem!=null)
+            if (this.currentDemonstrationEditor.selectedDemonstrationItem0!=null)
             {
             if (this.currentDemonstrationEditor.demonstrationStrategyType==1)
                 {
@@ -673,7 +673,7 @@ public class MainWindow extends FrameView {
 
     private void helpButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_helpButtonActionPerformed
         
-       String url = "http://www.milpgame.com";
+       String url = "http://us.metamath.org/other/milpgame/milpgame.html";
 
         if(Desktop.isDesktopSupported()){
             Desktop desktop = Desktop.getDesktop();
@@ -753,6 +753,120 @@ public class MainWindow extends FrameView {
 
      }
     }//GEN-LAST:event_openButtonActionPerformed
+private void fillButtonActionPerformed__(java.awt.event.ActionEvent evt) {
+
+     if (this.currentDemonstrationEditor!=null)
+         {
+            if (this.currentDemonstrationEditor.baseTheorem.hypotheses!=null)
+            {
+              if (!(this.currentDemonstrationEditor.baseTheorem.
+                                                         hypotheses.isEmpty()))
+            {
+             //we add to the List of Rules hypotheses if exist
+              int max=this.currentDemonstrationEditor.baseTheorem.
+                                                             hypotheses.size();
+              for(int i=0;i<max;i++)
+              {
+              Hypothesis hypi=this.currentDemonstrationEditor.baseTheorem.
+                                                             hypotheses.get(i);
+              AppliedItem aii=new AppliedItem();
+              aii.name=hypi.name;
+              aii.type=DemonstrationConstants.PROPER_HYPOTHESIS;
+              aii.priority=-1;
+              this.listOfAppliedItems.add(aii);
+
+              }
+            }
+            }
+        //we add to the List of Rules axioms
+            if (this.currentDemonstrationEditor.S.axioms!=null)
+            {
+             java.util.Iterator<Object>
+               it=this.currentDemonstrationEditor.S.axioms.values().iterator();
+             while(it.hasNext())
+             {
+              Axiom axi=(Axiom)it.next();
+              AppliedItem aii=new AppliedItem();
+              aii.name=axi.name;
+              if(axi.type==1)
+              {
+              aii.type=DemonstrationConstants.SIMPLE_AXIOM;
+              aii.priority=0;
+              }
+              else if(axi.type==2)
+              {
+               aii.type=DemonstrationConstants.AXIOM_FROM_COMPOSED_AXIOM;
+               aii.priority=axi.hypotheses.size();
+              }
+
+              this.listOfAppliedItems.add(aii);
+             }
+
+            }
+         //we add to the List of Rules theorems
+            if (this.currentDemonstrationEditor.S.theorems!=null)
+            {
+             java.util.Iterator<Object>
+               it=this.currentDemonstrationEditor.S.theorems.values().iterator();
+             while(it.hasNext())
+             {
+              Theorem thi=(Theorem)it.next();
+              AppliedItem aii=new AppliedItem();
+              aii.name=thi.name;
+              if(thi.type==1)
+              {
+              aii.type=DemonstrationConstants.SIMPLE_THEOREM;
+              aii.priority=0;
+              }
+              else if(thi.type==2)
+              {
+               aii.type=DemonstrationConstants.THEOREM_FROM_COMPOSED_THEOREM;
+               aii.priority=thi.hypotheses.size();
+              }
+
+              this.listOfAppliedItems.add(aii);
+             }
+
+            }
+         //here we sort the LR by priority
+          boolean ok=true;
+          int max0=this.listOfAppliedItems.size();
+          do
+          {
+           ok=true;
+           for(int i=0;i<max0-1;i++)
+           {
+            int priorityI=this.listOfAppliedItems.get(i).priority;
+            int priorityIp1=this.listOfAppliedItems.get(i+1).priority;
+            if (priorityI>priorityIp1)
+            {
+             ok=false;
+             String auxname=this.listOfAppliedItems.get(i).name;
+             int auxpriority=this.listOfAppliedItems.get(i).priority;
+             int auxtype=this.listOfAppliedItems.get(i).type;
+
+             this.listOfAppliedItems.get(i).name=
+                                          this.listOfAppliedItems.get(i+1).name;
+             this.listOfAppliedItems.get(i).priority=
+                                      this.listOfAppliedItems.get(i+1).priority;
+             this.listOfAppliedItems.get(i).type=
+                                          this.listOfAppliedItems.get(i+1).type;
+
+             this.listOfAppliedItems.get(i+1).name=auxname;
+             this.listOfAppliedItems.get(i+1).priority=auxpriority;
+             this.listOfAppliedItems.get(i+1).type=auxtype;
+            }
+
+           }
+
+          }
+          while(!ok);
+
+
+
+        }
+
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton aboutButton;

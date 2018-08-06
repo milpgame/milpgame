@@ -42,6 +42,8 @@ import java.math.RoundingMode;
 import org.jdesktop.application.Application;
 import java.io.*;
 import javax.swing.JFileChooser;
+import java.util.BitSet;
+
 
 
 
@@ -93,7 +95,7 @@ DemonstrationItem demonstrationSource=null;
 //variable used for new statements chaining
 List<DemonstrationItem> listOfStatements=new ArrayList<DemonstrationItem>();
 //demonstration item selected by the mouse
-public DemonstrationItem selectedDemonstrationItem=null;
+public DemonstrationItem selectedDemonstrationItem0=null;
 int xBeforeDemonstration=0,yBeforeDemonstration=0;
 int baseWidthBeforeDemonstration=0,baseHeightBeforeDemonstration=0;
 int baseMaximumHeightBeforeDemonstration=0;
@@ -133,6 +135,8 @@ int baseMaximumHeightBeforeDemonstration=0;
  public int numberOfOrderNewStatements=0;
  //the current index of variables of the whole demonstration
  public int numberOfOderVariables=0;
+ //at the depth(level) we apply i rule
+ List<Integer> depth=new ArrayList<Integer>();
  
  public Theorem baseTheorem=null;
  
@@ -174,6 +178,7 @@ int baseMaximumHeightBeforeDemonstration=0;
  //we found the hub with the given index
  public boolean weFoundHubWithIndex=false;
  public int howManyRepetitionsWeHave=0;
+ public boolean weDestroyedHubOrRepetition=false;
  public DemonstrationEditor(
                            Source source1,
                            MainWindow window,
@@ -256,10 +261,10 @@ int baseMaximumHeightBeforeDemonstration=0;
          DemonstrationItem item=(DemonstrationItem) node.getUserObject();
          if (item!=null)
          {
-             this.selectedDemonstrationItem=item;//we memorize the selection
+             this.selectedDemonstrationItem0=item;//we memorize the selection
          if (
-              (this.selectedDemonstrationItem.type==DemonstrationConstants.NEW_STATEMENT)
-              |(this.selectedDemonstrationItem.type==DemonstrationConstants.TARGET)
+              (this.selectedDemonstrationItem0.type==DemonstrationConstants.NEW_STATEMENT)
+              |(this.selectedDemonstrationItem0.type==DemonstrationConstants.TARGET)
             )
          {
 
@@ -270,10 +275,10 @@ int baseMaximumHeightBeforeDemonstration=0;
              {
                           
              if (
-                     this.selectedDemonstrationItem.downLink!=null
+                     this.selectedDemonstrationItem0.downLink!=null
                 )
              {
-             if (this.selectedDemonstrationItem.downLink.size()>0)
+             if (this.selectedDemonstrationItem0.downLink.size()>0)
              {
              
              } else this.frame.branchCreationButton.setEnabled(true);
@@ -283,10 +288,10 @@ int baseMaximumHeightBeforeDemonstration=0;
 
              //we enable delete button if the item has subordinates
              if (
-                     this.selectedDemonstrationItem.downLink!=null
+                     this.selectedDemonstrationItem0.downLink!=null
                 )
              {
-             if (this.selectedDemonstrationItem.downLink.size()>0)
+             if (this.selectedDemonstrationItem0.downLink.size()>0)
              {
              this.frame.branchDeletingButton.setEnabled(true);
              }
@@ -303,14 +308,18 @@ int baseMaximumHeightBeforeDemonstration=0;
         if((item.type==DemonstrationConstants.NEW_STATEMENT)
             &(!item.repetition))
         {
-              //we check if item has at least 1 level under
+              //we check if item has at least 2 levels under
                if(item.downLink!=null)
                {
                if(!item.downLink.isEmpty())
                {
-               
+               if(item.downLink.get(0).downLink!=null)
+               {
+               if(!item.downLink.get(0).downLink.isEmpty())
+               {
                  this.listOfStatements.add(item);
-                            
+               }
+               }
                }
                }
         }
@@ -327,7 +336,7 @@ int baseMaximumHeightBeforeDemonstration=0;
      }
      public void createBranchAndUpdate()
     {
-         if (this.selectedDemonstrationItem!=null)
+         if (this.selectedDemonstrationItem0!=null)
          {
              javax.swing.JPanel basePanel=null;
              basePanel=(javax.swing.JPanel)demonstrationTree.getParent();
@@ -339,24 +348,44 @@ int baseMaximumHeightBeforeDemonstration=0;
                  if (frame.nameOfMemorizedItem!=null)
                  {
                   
-                    String nume=frame.nameOfMemorizedItem;
+                    String name0=frame.nameOfMemorizedItem;
                     if (this.demonstrationStrategyType==0)
                     {
-                    this.createNewBranchBackwardChaining
+                      if(!(this.selectedDemonstrationItem0.repetition))
+                      {
+                      if (this.selectedDemonstrationItem0.downLink==null)
+                       {
+                         this.createNewBranchBackwardChaining
                              (
-                             this.selectedDemonstrationItem,
-                             nume,
+                             this.selectedDemonstrationItem0,
+                             name0,
                              frame.typeOfMemorizedItem
                              );
                     
-                    this.verifyRepetition(this.demonstrationSource);
+                        this.verifyRepetition(this.demonstrationSource);
+                       }
+                       else
+                       {
+                       if (this.selectedDemonstrationItem0.downLink.isEmpty())
+                         {
+                            this.createNewBranchBackwardChaining
+                             (
+                             this.selectedDemonstrationItem0,
+                             name0,
+                             frame.typeOfMemorizedItem
+                             );
+
+                             this.verifyRepetition(this.demonstrationSource);
+                         }
+                       }
+                     }
                      }
                     else
                     {
                      this.createNewBranchForwardChaining
                              (
-                             this.selectedDemonstrationItem,
-                             nume,
+                             this.selectedDemonstrationItem0,
+                             name0,
                              frame.typeOfMemorizedItem
                              );
                     }
@@ -413,7 +442,7 @@ int baseMaximumHeightBeforeDemonstration=0;
     
    public void moveUpFCAndUpdate()
     {
-         if (this.selectedDemonstrationItem!=null)
+         if (this.selectedDemonstrationItem0!=null)
          {
              javax.swing.JPanel basePanel=null;
              basePanel=(javax.swing.JPanel)demonstrationTree.getParent();
@@ -425,14 +454,14 @@ int baseMaximumHeightBeforeDemonstration=0;
              if(this.demonstrationSource.downLink!=null)
                 {
              position1=
-                  this.demonstrationSource.downLink.indexOf(selectedDemonstrationItem);
+                  this.demonstrationSource.downLink.indexOf(selectedDemonstrationItem0);
              if(position1>0)
                {
                 DemonstrationItem item1=
                            this.demonstrationSource.downLink.get(position1-1);
                 this.demonstrationSource.downLink.remove(position1);
                 this.demonstrationSource.downLink.
-                                               add(position1-1, selectedDemonstrationItem);
+                                               add(position1-1, selectedDemonstrationItem0);
                 
                }
 
@@ -486,7 +515,7 @@ int baseMaximumHeightBeforeDemonstration=0;
 
    public void moveDownFCAndUpdate()
     {
-         if (this.selectedDemonstrationItem!=null)
+         if (this.selectedDemonstrationItem0!=null)
          {
              javax.swing.JPanel basePanel=null;
              basePanel=(javax.swing.JPanel)demonstrationTree.getParent();
@@ -498,14 +527,14 @@ int baseMaximumHeightBeforeDemonstration=0;
              if(this.demonstrationSource.downLink!=null)
                 {
              position1=
-                  this.demonstrationSource.downLink.indexOf(selectedDemonstrationItem);
+                  this.demonstrationSource.downLink.indexOf(selectedDemonstrationItem0);
              max=this.demonstrationSource.downLink.size();
                if(position1+1<max)
                {
                 
                 this.demonstrationSource.downLink.remove(position1);
                 this.demonstrationSource.downLink.
-                                               add(position1+1, selectedDemonstrationItem);
+                                               add(position1+1, selectedDemonstrationItem0);
 
                }
 
@@ -556,10 +585,38 @@ int baseMaximumHeightBeforeDemonstration=0;
          }
          }
     }
+public void demarcateHubsOrRepetitions(DemonstrationItem d)
+{
+  if (d!=null)
+  {
+   if(d.type==DemonstrationConstants.NEW_STATEMENT)
+   {
+    if ((d.markedAsAHub)|(d.repetition))
+     {
+      d.markedAsAHub=false;
+      d.repetition=false;
+      d.numberOfOrderInCompressedProof=0;
+     }   
+   }
+   if(d.downLink!=null)
+   {
+    if(!(d.downLink.isEmpty()))
+    {
+     int max=d.downLink.size();
+     for(int i=0;i<max;i++)
+     {
+       demarcateHubsOrRepetitions(d.downLink.get(i));  
+     }
+    }
+   }
+   
+   
+  }
+}
 
    public void deleteBranchAndUpdateGraph()
     {
-         if (this.selectedDemonstrationItem!=null)
+         if (this.selectedDemonstrationItem0!=null)
          {
              javax.swing.JPanel basePanel=null;
              basePanel=(javax.swing.JPanel)demonstrationTree.getParent();
@@ -573,13 +630,21 @@ int baseMaximumHeightBeforeDemonstration=0;
                 {
                  if (frame.currentDemonstrationEditor.demonstrationStrategyType==0)
                 {
-                 this.destroyBranchBackwardChaining(selectedDemonstrationItem, true);
-                 //total update of the concerned demonstration
-                 this.reUpdateDemonstrationBackwardChaining();
+                 this.weDestroyedHubOrRepetition=false;
+                 this.destroyBranchBackwardChaining(selectedDemonstrationItem0, true);
+                 this.updateStatementsAfterDestruction(demonstrationSource);
+                 if(this.weDestroyedHubOrRepetition)
+                 {
+                  this.demarcateHubsOrRepetitions(demonstrationSource);
+                  this.numberOfHubs=0;
+                  this.numberOfHubs2=0;
+                  this.verifyRepetition(demonstrationSource);
+                 }
+                 
                 }
                 else if (frame.currentDemonstrationEditor.demonstrationStrategyType==1)
                 {
-                  this.destroyBranchForwardChaining(selectedDemonstrationItem, true);
+                  this.destroyBranchForwardChaining(selectedDemonstrationItem0, true);
                 }
 
                 }
@@ -972,7 +1037,44 @@ private void createVisualItemTheorem
        x=x+width1+xSpace;
       //END open button
 
+      /*
+        //automation button
 
+       openDemonstration=this.createButton("Automation");
+       openDemonstration.addActionListener(
+            new java.awt.event.ActionListener()
+        {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+             automation();
+            }
+        });
+       Dimension automationDimension= openDemonstration.getPreferredSize();
+        width1=200;
+        height1=automationDimension.height;
+
+          x=xMargin+referenceWidth/2-width1/2;
+          y=y+maximumHeightBase+ySpace;
+          maximumHeightBase=height1;
+
+      if (y+height1+ySpace>baseHeight)
+    {
+        int distance=y+height1+ySpace-baseHeight;
+        baseHeight=baseHeight+distance;
+
+    }
+      basePanel.setPreferredSize(
+              new Dimension(referenceWidth+xSpaceRight,baseHeight));
+      basePanel.add(openDemonstration);
+      openDemonstration.setBounds(x, y, width1,height1);
+
+      if(height1>maximumHeightBase) maximumHeightBase=height1;
+       x=x+width1+xSpace;
+      //END automation button
+
+       *
+       */
         //exit button
       
        exit=this.createButton("Close");
@@ -1298,6 +1400,65 @@ catch(ClassNotFoundException e)
  //unoccupied
  this.setCursor(Cursor.getDefaultCursor());
 }
+public void automation()
+{
+  this.backwardChainingSearch(demonstrationSource, 0,0);
+ /*
+    javax.swing.JPanel basePanel=null;
+    basePanel=(javax.swing.JPanel)demonstrationTree.getParent();
+
+ if(basePanel!=null)
+ {
+  this.backwardChainingSearch(demonstrationSource, 0);
+ //redisplay demonstration
+ basePanel.remove(demonstrationTree);
+ //restoration
+ x=xBeforeDemonstration;
+ y=yBeforeDemonstration;
+ referenceWidth=baseWidthBeforeDemonstration;
+ baseHeight=baseHeightBeforeDemonstration;
+ maximumHeightBase=baseMaximumHeightBeforeDemonstration;
+ //END restoration
+ if (demonstrationSource!=null)
+{
+   demonstrationTree=
+           createDemonstrationTree(demonstrationSource);
+   Dimension d2=demonstrationTree.getPreferredSize();
+    width1=d2.width;
+    height1=d2.height;
+
+      x=xMargin;
+      y=y+maximumHeightBase+ySpace;
+      maximumHeightBase=height1;
+
+  if (y+height1+ySpace>baseHeight)
+{
+      int dist=y+height1+ySpace-baseHeight;
+    baseHeight=baseHeight+dist;
+}
+
+ int width=0;
+ width=referenceWidth;
+ if (referenceWidth<width1) width=width1;
+
+  basePanel.setPreferredSize(
+       new Dimension(width+10*xSpaceRight,baseHeight));
+  basePanel.add(demonstrationTree);
+  demonstrationTree.setBounds(x, y, width1,height1);
+
+  if(height1>maximumHeightBase) maximumHeightBase=height1;
+   x=x+width1+xSpace;
+ //redesign base panel
+ basePanel.revalidate();
+ basePanel.repaint();
+ basePanel.repaint();
+}
+//END redisplay demonstration
+ }
+  *
+  */
+}
+
 public void close()
  {
       int nr=JOptionPane.showConfirmDialog
@@ -1690,12 +1851,16 @@ public void findXHub(DemonstrationItem xStatement,DemonstrationItem demonstratio
           {
           if (Source.isEqualXWithY(demonstrationItem.items, xStatement.items))
           {
-             //we verify if demonstrationItem has 1 level of descendants
+             //we verify if demonstrationItem has 2 levels of descendants
               if(demonstrationItem.downLink!=null)
               {
                if(!demonstrationItem.downLink.isEmpty())
                {
-              
+
+               if(demonstrationItem.downLink.get(0).downLink!=null)
+              {
+               if(!demonstrationItem.downLink.get(0).downLink.isEmpty())
+               {
                  found=true;
                  this.numberOfHubs++;
                  //we mark as a hub demonstationItem
@@ -1705,7 +1870,8 @@ public void findXHub(DemonstrationItem xStatement,DemonstrationItem demonstratio
                  xStatement.repetition=true;
                  xStatement.numberOfOrderInCompressedProof=numberOfHubs;
 
-               
+                }
+               }
                }
               }
             
@@ -1874,9 +2040,9 @@ public void destroyLinkStatementAndHub(DemonstrationItem newStatement)
        hub=entry.getValue();
         if (hub==newStatement)
         {
-            DemonstrationItem afir_legata=entry.getKey();
-            list.add(afir_legata);
-            afir_legata.repetition=false;//we demarcate that is repetition
+            DemonstrationItem linkedStatement=entry.getKey();
+            list.add(linkedStatement);
+            linkedStatement.repetition=false;//we demarcate that is repetition
         }
     }
   }
@@ -2097,12 +2263,20 @@ public synchronized void  destroyBranchBackwardChaining
         newStatementAndGeneratedVariable.remove(statementName);
 
       }
+
+
+
     //if is not base we destroy the statement
     if (demonstrationItem.type==DemonstrationConstants.NEW_STATEMENT)
     {
+     //if demonstrationItem is a hub or repetition we mark
+      if((demonstrationItem.markedAsAHub)|
+          (demonstrationItem.repetition))
+       {this.weDestroyedHubOrRepetition=true;}
     if(!isBase)
     {
-    if (this.newStatementAndContentPhaseZero.containsKey(statementName))
+     
+     if (this.newStatementAndContentPhaseZero.containsKey(statementName))
     {
      this.newStatementAndContentPhaseZero.remove(statementName);
      //we destroy the link between new statement and his hub
@@ -2113,6 +2287,8 @@ public synchronized void  destroyBranchBackwardChaining
     }
     }
     }
+
+
     }
     }
     }
@@ -2176,7 +2352,7 @@ public synchronized void  destroyBranchForwardChaining
              }
              //we destroy the branch
              demonstrationSource.downLink.remove(demonstrationItem);
-             //we add starting up with the position0 position2
+             //we add starting up with the position position2
              int n2=list.size();
              for(int i=0;i<n2;i++)
              {
@@ -5327,6 +5503,239 @@ public void howManyRepetitionsS(int a, SyntacticItem item)
 
     }
 }
+boolean backwardChainingSearch(DemonstrationItem demonstrationItem, 
+                                                         int level,int position)
+{
+ boolean ok=false, finishedSearch=false;int i=0;
+ this.selectedDemonstrationItem0=demonstrationItem;
+ if(level<=12)
+ {
+ if(demonstrationItem!=null)
+ {
+ do
+ {
+  if (level>=2)
+  {
+   //if we have applied the same rule three times we pass to the next rule
+    if ((this.depth.get(level-1)==this.depth.get(level-2))
+        &(this.depth.get(level-1)==i)){i++;}
+  }
+   //nameI- the name of a a,e,p from the listOfAppliedItems(List of Rules)
+   //typeI - the type of a a,e,p from the listOfAppliedItems(List of Rules)
+   String nameI="";
+   int typeI=0;
+   int maxRules=0;//number of rules in the List of Rules
 
+        Application0 a=(Application0)Application.getInstance();
+         if(a!=null)
+         {
+         if(a.frame0!=null)
+         {
+
+         if(a.frame0.listOfAppliedItems!=null)
+         {
+            maxRules=a.frame0.listOfAppliedItems.size();
+          if(
+             (i>-1)&
+             (i<maxRules)
+            )
+        {
+        nameI=a.frame0.listOfAppliedItems.get(i).name;
+        typeI=a.frame0.listOfAppliedItems.get(i).type;
+        }
+        }
+        }
+        }
+  if(i==maxRules) {break;}
+
+  if (this.createNewBranchBackwardChaining(demonstrationItem,nameI ,typeI ))
+  {
+   /*here the program enters if demonstrationItem unify with the i rule from
+   the List of Rules */
+   this.depth.add(level,i);//at level level we apply i rule
+   System.out.println("We are at level:"+level+",pos:"+position+
+                                    " and we have apllied:"+nameI+" order:"+i);
+   /* here we discover the newly generated statements(if exists) obtained
+    by applying the i rule and we put them in a collection  */
+   List<DemonstrationItem> generatedStatements=new ArrayList<DemonstrationItem>();
+
+   if ((demonstrationItem.type==DemonstrationConstants.TARGET)
+       |(demonstrationItem.type==DemonstrationConstants.BASE)
+       |(demonstrationItem.type==DemonstrationConstants.NEW_STATEMENT))
+   {
+     DemonstrationItem appliedTheoremOrAxiom=null;
+     if (demonstrationItem.downLink!=null)
+     {
+     if (!(demonstrationItem.downLink.isEmpty()))
+     {
+      appliedTheoremOrAxiom=demonstrationItem.downLink.get(0);
+      if(appliedTheoremOrAxiom!=null)
+      {
+       if((appliedTheoremOrAxiom.type==DemonstrationConstants.AXIOM_FROM_COMPOSED_AXIOM)
+         |(appliedTheoremOrAxiom.type==DemonstrationConstants.THEOREM_FROM_COMPOSED_THEOREM)
+         )
+          {
+           if(appliedTheoremOrAxiom.downLink!=null)
+            {
+            if (!(appliedTheoremOrAxiom.downLink.isEmpty()))
+               {
+                int max0=appliedTheoremOrAxiom.downLink.size();
+
+                for(int c1=0;c1<max0;c1++)
+                 {
+                  DemonstrationItem generatedStatement=null;
+                  DemonstrationItem hypothesis=null;
+                  hypothesis=appliedTheoremOrAxiom.downLink.get(c1);
+
+                  if((hypothesis.type==DemonstrationConstants.HYPOTHESIS_FROM_COMPOSED_AXIOM)
+                     |(hypothesis.type==DemonstrationConstants.HYPOTHESIS_FROM_COMPOSED_THEOREM)
+                    )
+                   {
+                    if(hypothesis.downLink!=null)
+                     {
+                      if(!(hypothesis.downLink.isEmpty()))
+                      {
+                       generatedStatement=hypothesis.downLink.get(0);
+                       //if the found demonstration item is a new statement
+                       //we add to the list generatedStatements
+                       if(generatedStatement.type==DemonstrationConstants.NEW_STATEMENT)
+                         {
+                           generatedStatements.add(c1,generatedStatement);
+                         }
+
+                      }
+
+                     }
+                   }
+
+                  
+
+                 }
+
+               }
+            }
+          }
+      }
+
+     }
+     }
+   }
+    
+    //here we display the chosen decision
+             javax.swing.JPanel basePanel=null;
+             basePanel=(javax.swing.JPanel)demonstrationTree.getParent();
+
+             if(basePanel!=null)
+             {
+                 //redisplay demonstration
+                 basePanel.remove(demonstrationTree);
+                //restoration
+                 x=xBeforeDemonstration;
+                 y=yBeforeDemonstration;
+                 referenceWidth=baseWidthBeforeDemonstration;
+                 baseHeight=baseHeightBeforeDemonstration;
+                 maximumHeightBase=baseMaximumHeightBeforeDemonstration;
+                 //END restoration
+                 if (demonstrationSource!=null)
+                {
+                   demonstrationTree=
+                           createDemonstrationTree(demonstrationSource);
+                   Dimension d2=demonstrationTree.getPreferredSize();
+                    width1=d2.width;
+                    height1=d2.height;
+
+                      x=xMargin;
+                      y=y+maximumHeightBase+ySpace;
+                      maximumHeightBase=height1;
+
+                  if (y+height1+ySpace>baseHeight)
+                {
+                      int dist=y+height1+ySpace-baseHeight;
+                    baseHeight=baseHeight+dist;
+                }
+
+                 int width=0;
+                 width=referenceWidth;
+                 if (referenceWidth<width1) width=width1;
+
+                  basePanel.setPreferredSize(
+                       new Dimension(width+10*xSpaceRight,baseHeight));
+                  basePanel.add(demonstrationTree);
+                  demonstrationTree.setBounds(x, y, width1,height1);
+
+                  if(height1>maximumHeightBase) maximumHeightBase=height1;
+                   x=x+width1+xSpace;
+                 //redesign base panel
+                 basePanel.revalidate();
+                 basePanel.repaint();
+                 basePanel.repaint();
+             }
+            
+             }
+   //END display
+    /* try
+    {
+        Thread.sleep(1000);
+    }
+    catch(InterruptedException ex)
+    {
+        Thread.currentThread().interrupt();
+    }
+
+     * 
+     */
+   if (generatedStatements.isEmpty())
+   {
+    finishedSearch=true;ok=true;
+   }
+   else
+   {
+     int max=generatedStatements.size();
+     boolean allAreProved=true;
+     BitSet bs=new BitSet(max);
+     for(int i0=0;i0<max;i0++)
+     {
+       allAreProved=true;
+       for(int j0=0;j0<max;j0++)
+       {
+        /*we try to prove the j0 statement from the generatedStatements
+         * and we mark if is a succes inf  bs array
+         */
+        boolean boolValue=false;
+        //if bs at position j0 is not true we demonstrate (again if necesary)
+        if (!(bs.get(j0)))
+        {
+        boolValue=backwardChainingSearch
+                                     (generatedStatements.get(j0),level+1,j0);
+        bs.set(j0, boolValue);
+        }
+        
+        if(!boolValue){allAreProved=false;}
+       }
+       //if all are proved we exit from the loop
+       if(allAreProved){finishedSearch=true;ok=true;break;}
+     }
+     /*if it's not possible to prove all the generatedStatements
+      we are moving to the next rules from the List of Rules
+      */
+     if(!allAreProved) 
+     {
+     //we delete the proof on demonstrationItem and we pass to the next rule
+     this.destroyBranchBackwardChaining(demonstrationItem, true);
+     this.updateStatementsAfterDestruction(demonstrationSource);
+     i++;
+     }
+
+   }
+
+  }
+ else i++;
+ if (i==maxRules) {break;}//we exit from the main loop
+ }while(!finishedSearch);
+ }
+ }
+ return ok;
+
+}
 
 }

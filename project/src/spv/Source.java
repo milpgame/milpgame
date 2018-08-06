@@ -2267,7 +2267,7 @@ if (content!=null)
 if (!newVariablesList.isEmpty())
 {
 //the statement and list of new variables
-editor.newStatementAndGeneratedVariable.put(editor.selectedDemonstrationItem.name, newVariablesList);
+editor.newStatementAndGeneratedVariable.put(editor.selectedDemonstrationItem0.name, newVariablesList);
 }
 
 }
@@ -2275,7 +2275,7 @@ editor.newStatementAndGeneratedVariable.put(editor.selectedDemonstrationItem.nam
 
 
 //we update the link between statement and the new variables that have content
-String statementName=editor.selectedDemonstrationItem.name;
+String statementName=editor.selectedDemonstrationItem0.name;
 if (variablesToUpdate!=null)
  {
  if (!variablesToUpdate.isEmpty())
@@ -2307,7 +2307,7 @@ public static void generateNewVariables
 
 if (totalVariables!=null)
 {
-String statementName=editor.selectedDemonstrationItem.name;
+String statementName=editor.selectedDemonstrationItem0.name;
 int totalVariablesDimension=totalVariables.size();
 /*we go through total variables and we see if exists in variableContent
  and if not exists we will create new variables and will load them in

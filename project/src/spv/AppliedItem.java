@@ -13,6 +13,7 @@ public class AppliedItem implements java.io.Serializable {
    
     public String name="";
     public int type=DemonstrationConstants.THEOREM_FROM_COMPOSED_THEOREM;
+    public int priority=0;
     
 
 }
