@@ -162,6 +162,16 @@ public byte[] buffer1=new byte[200];// array used for file reading
 public int positionInBuffer1=0;//position in the buffer1
 public int maxBuffer1=0;//maximum of read byte from buffer1
 public byte buffer0=0;//current byte from the file
+
+//variables for building distinct requirements of proved theorem
+
+public String provedTheorem1="";
+public String appliedRule1="";
+public String variablesAndContent1="";
+//list of generated distinct requirements for the proved theorem
+ List<DistinctRequirement>  listDR=new ArrayList<DistinctRequirement>();
+
+//END requirements
 public Source(String fileName)
 {   
        try
@@ -2627,7 +2637,7 @@ public boolean verifySyntacticType
  syntacticItem.containedItems=new ArrayList<SyntacticItem>();
  syntacticItem.definitionClass=class1;
  //END update
- 
+
  boolean ok=false,checkItOut=false;
  //variable used for memorize the last position from statement
  //that respect the conditions of "class1" definition
@@ -2636,7 +2646,7 @@ public boolean verifySyntacticType
  List<Object> vector=null;
  vector=this.classListOfDefinitions.get(class1);//find the vector cu class1 definitions
  int position=initialPosition;
- 
+
  if (vector!=null)
  {
   //the counter of syntactic definition (class1) visited at the moment t
@@ -2649,12 +2659,12 @@ public boolean verifySyntacticType
    //we liberate the contained items
    syntacticItem.containedItems.clear();
    position=initialPosition;
-  
-  
 
- do 
+
+
+ do
  {
-    
+
     List<ConstantAndVariable> definition=null;
     if (vector.get(vectorIndex).getClass().equals(Axiom.class))
     {
@@ -2675,13 +2685,13 @@ public boolean verifySyntacticType
     if (definition!=null)
     {
     checkItOut=true;
-    
+
     int j=1;//we start form 1,on 0 is the type(wff,set,class,..)
     int dimension=definition.size();
     do
     {
      ConstantAndVariable cv_j=definition.get(j);
-     
+
      if (position<statement.size())
      {
       //if  on j position we have a constant in the definition
@@ -2709,11 +2719,11 @@ public boolean verifySyntacticType
          variableClass=cv_j.variableClass;
          SyntacticItem newSyntacticItem=new SyntacticItem();
          newSyntacticItem.initialPosition=position;//we set  already the initial position
-         if 
+         if
          (!this.verifySyntacticType
                  (statement, variableClass, position,false,newSyntacticItem)
          )
-             
+
          {
              checkItOut=false;
          }
@@ -2749,11 +2759,11 @@ public boolean verifySyntacticType
  while(vectorIndex<vectorDimension);
  }
 
-   
+
  if (!checkItOut)
  {
     //we verify if on position "position" we have a variable of class "class1"
-  if (statement.get(position).constantOrVariable==2)
+  if (statement.get(position).constantOrVariable==2)//erorr index 0 size0
           {
              if
                (
@@ -2766,7 +2776,7 @@ public boolean verifySyntacticType
                  lastPosition=position;
                  syntacticItem.a_p_v=3;//it is a variable
                  syntacticItem.definitionName=statement.get(position).constantOrVariableText;
-                 
+
                if (checkItOut&isBase&((lastPosition+1)<statement.size()))
                     {
                      checkItOut=false;
@@ -2785,7 +2795,7 @@ public boolean verifySyntacticType
  {
      ok=false;
  }
- 
+
  syntacticItem.finalPosition=lastPosition;//we update the final position
  return ok;
 }
@@ -2793,6 +2803,7 @@ public SyntacticItem generateSyntacticTree2(List<ConstantAndVariable> statement,
 {
 boolean ok=true;
 SyntacticItem syntacticItem=new SyntacticItem();
+syntacticItem.definitionName="#$1";
 syntacticItem.initialPosition=1;//initial position is 1
 //we start with position1,on 0 is |-
 ok=this.verifySyntacticType2(statement,class1,0,true,syntacticItem);
@@ -2894,6 +2905,7 @@ public boolean verifySyntacticType2
          variableClass=cv_j.variableClass;
          SyntacticItem newSyntacticItem=new SyntacticItem();
          newSyntacticItem.initialPosition=position;//we already set the initial position
+         newSyntacticItem.definitionName="#$^new";
          if
          (!this.verifySyntacticType2
                  (statement, variableClass, position,false,newSyntacticItem)
@@ -3381,6 +3393,11 @@ public  boolean compareTemplateWithBase
 
 public DemonstrationItem generateDemonstration(ParsingItem theoremLabelItem)
 {
+
+ this.listDR.clear();//we delete all the distinct requirements
+ 
+ provedTheorem1=theoremLabelItem.textSymbol;//we memorize the name of the theorem
+ //System.out.println(provedTheorem1+":");
 ParsingItem equalItem=null;
 //with this cursor we go through compressed demonstration
 int demonstrationCursor=0;
@@ -3792,10 +3809,14 @@ Hypothesis properAssumption=(Hypothesis)baseDemonstration.referenceObject;
 newString=variablesContentInsertion(assumptionFromAxiom.items,variableContent);
 
 if (!isEqualXWithY(newString,properAssumption.items))
+{
 errorNewLine("Misfit hypothesis_from_axiom and proper_hypothesis:"
                                              +assumptionFromAxiom.name+","
                                              +properAssumption.name+" from "+t.name);
+errorNewLine("-> "+displayCV(newString));
+errorNewLine("-> "+displayCV(properAssumption.items));
 
+}
 }
 else if (baseDemonstration.type==DemonstrationConstants.NEW_STATEMENT)
 {
@@ -3805,11 +3826,14 @@ Hypothesis assumptionFromAxiom=(Hypothesis) xDemonstration.referenceObject;
 newString=variablesContentInsertion(assumptionFromAxiom.items,variableContent);
 
 if (!isEqualXWithY(newString,baseDemonstration.items))
+{
 errorNewLine("Misfit hypothesis_from_axiom and new_statement:  "
                                                 +assumptionFromAxiom.name+","
                                                 +baseDemonstration.name+" from "+t.name);
+errorNewLine("-> "+displayCV(newString));
+errorNewLine("-> "+displayCV(baseDemonstration.items));
 
-
+}
 
 }
 
@@ -3848,9 +3872,10 @@ if(xAxiom.distinct!=null)
 { 
  boolean ok=true;
  int n1=xAxiom.distinct.size();//number of groups of $d $.
+ appliedRule1=xAxiom.name;//we memorize the applied axiom
  for(int i1=0;i1<n1;i1++)
  {
-   ok=Source.checkVariables(xAxiom.distinct.get(i1), variableContent);
+   ok=this.checkVariables(xAxiom.distinct.get(i1), variableContent);
    if(!ok){break;}
  }
  if(!ok){errorNewLine("Non-distinct variables at: "+xAxiom.name+
@@ -4050,9 +4075,13 @@ Hypothesis properAssumptiom=(Hypothesis) baseDemonstration.referenceObject;
 newString=variablesContentInsertion(assumptionFromTheorem.items,variableContent);
 
 if (!isEqualXWithY(newString,properAssumptiom.items))
+{
 errorNewLine("Misfit hypothesis_from_theorem and proper_hypothesis: "
              +assumptionFromTheorem.name+ ","+properAssumptiom.name+" from "+t.name);
+errorNewLine("-> "+displayCV(newString));
+errorNewLine("-> "+displayCV(properAssumptiom.items));
 
+}
 }
 else if (baseDemonstration.type==DemonstrationConstants.NEW_STATEMENT)
 {
@@ -4062,11 +4091,14 @@ Hypothesis assumptionFromTheorem=(Hypothesis) xDemonstration.referenceObject;//a
 newString=variablesContentInsertion(assumptionFromTheorem.items,variableContent);
 
 if (!isEqualXWithY(newString,baseDemonstration.items))
+{
 errorNewLine("Misfit hypothesis_from_theorem and new_statement: "
         +assumptionFromTheorem.name+","+baseDemonstration.name+" from "+t.name);
 
+errorNewLine("-> "+displayCV(newString));
+errorNewLine("-> "+displayCV(baseDemonstration.items));
 
-
+}
 }
 
 else errorNewLine("Tree proof: hypothesis_from_complex_theorem->"+
@@ -4106,9 +4138,10 @@ if(xTheorem.distinct!=null)
 {
  boolean ok=true;
  int n1=xTheorem.distinct.size();//number of groups of $d $.
+ appliedRule1=xTheorem.name;//we memorize the applied theorem
  for(int i1=0;i1<n1;i1++)
  {
-   ok=Source.checkVariables(xTheorem.distinct.get(i1), variableContent);
+   ok=this.checkVariables(xTheorem.distinct.get(i1), variableContent);
    if(!ok){break;}
  }
  if(!ok){errorNewLine("Non-distinct variables at:"+xTheorem.name+
@@ -4253,10 +4286,41 @@ else {lista_elem=mainDemonstrationItem.items;}
 if (!this.isEqualXWithY(t.items,lista_elem))
 {
 errorNewLine("Misfit final statement with so_called_theorem: "+t.name);
+errorNewLine("-> "+displayCV(t.items));
 this.numberOfInactiveTheorems++;//we grow the number of inactive theorems
 }
+ 
 }
+//here we will verify witch of distinct requirements are not
+//already defined
+if(t.distinct!=null)
+{
+ 
+ int n1=t.distinct.size();//number of groups of $d $.
 
+ for(int i1=0;i1<n1;i1++)
+ {
+   this.checkDistinctReq(t.distinct.get(i1),this.listDR);
+
+ }
+
+}
+//if we have distinct var. requirements that are not already defined we show them
+int dimDR=this.listDR.size();
+if (dimDR>0)
+{
+ for(int i0=0;i0<dimDR;i0++)
+ {
+  String provedTheorem1=this.listDR.get(i0).provedTheorem;
+  String appliedRule1=this.listDR.get(i0).appliedRule;
+  String variablesAndContent1=this.listDR.get(i0).variablesAndContent;
+  String v1=this.listDR.get(i0).distinctV1;
+  String v2=this.listDR.get(i0).distinctV2;
+  errorNewLine("Proving: "+provedTheorem1+" by applying rule:"+appliedRule1+
+          " at distinct var.: "+variablesAndContent1+
+          " require: $d "+v1+" "+v2+"  $.");
+ }
+}
 //we return the base of demonstration
 return mainDemonstrationItem;
 }
@@ -4947,6 +5011,73 @@ this.dataCurrentItem.fatherChapter=this.dataRoot;
 }
     
 }
+ public void generateDistinctRequirements(List<ConstantAndVariable> v1,
+                                                  List<ConstantAndVariable> v2)
+{
+int numberOfVar1=0,numberOfVar2=0;
+List<String> listVar1=new ArrayList<String>(), listVar2=new ArrayList<String>();
+int d1=0,d2=0;
+d1=v1.size();
+d2=v2.size();
+
+//we we gather the variable in a list
+for (int i=0;i<d1;i++)
+{
+if (v1.get(i).constantOrVariable==2)
+{
+   listVar1.add(v1.get(i).constantOrVariableText);
+}
+}
+
+
+for (int j=0;j<d2;j++)
+{
+if (v2.get(j).constantOrVariable==2)
+{
+   listVar2.add(v2.get(j).constantOrVariableText);
+}
+}
+numberOfVar1=listVar1.size();
+numberOfVar2=listVar2.size();
+
+if ((numberOfVar1>0)&(numberOfVar2>0))
+{
+ if(numberOfVar1==1)
+ {
+  for(int i=0;i<numberOfVar2;i++)
+  {
+   //System.out.println("$d "+listVar1.get(0)+" "+listVar2.get(i)+" $.");
+   DistinctRequirement dr=new DistinctRequirement(
+           provedTheorem1.substring(0),
+           appliedRule1.substring(0),
+           variablesAndContent1.substring(0),
+           listVar1.get(0).substring(0),
+           listVar2.get(i).substring(0)
+           );
+   this.listDR.add(dr);
+  
+  }
+
+ }
+ else if(numberOfVar2==1)
+ {
+    for(int j=0;j<numberOfVar1;j++)
+  {
+   //System.out.println("$d "+listVar2.get(0)+" "+listVar1.get(j)+" $.");
+    DistinctRequirement dr=new DistinctRequirement(
+           provedTheorem1.substring(0),
+           appliedRule1.substring(0),
+           variablesAndContent1.substring(0),
+           listVar2.get(0).substring(0),
+           listVar1.get(j).substring(0)
+           );
+    this.listDR.add(dr);
+  }
+ }
+ 
+}
+
+}
 
 static public boolean distinctVariables(List<ConstantAndVariable> v1,List<ConstantAndVariable> v2)
 {
@@ -5007,12 +5138,23 @@ static public boolean distinctVariables(List<ConstantAndVariable> v1,List<Consta
     
     return ok;
 }
-static public boolean checkVariables(List<String> variablesList,
+static public String showVariableContent(List<ConstantAndVariable> variableContent)
+{
+    String s="";
+    int d=variableContent.size();
+    for(int i=0;i<d;i++)
+    {
+     s=s+" "+variableContent.get(i).constantOrVariableText;
+    }
+
+    return s;
+}
+ public boolean checkVariables(List<String> variablesList,
            Map<String,List<ConstantAndVariable>> variableContent)
 {
     //here we check the variables from a $d $. if they are distinct
-    boolean ok=true;
-    //variablesList =list of distinct variables
+    boolean ok=true, ok2;
+    //variablesList = list of distinct variables
     int n=variablesList.size();
     if(n>1)
     {
@@ -5020,21 +5162,83 @@ static public boolean checkVariables(List<String> variablesList,
     {
         for(int j=1;j<n-i;j++)
         {
+          String varI=variablesList.get(i);
+          String varIplusJ=variablesList.get(i+j);
          List<ConstantAndVariable> variableContent1=variableContent.get(variablesList.get(i)),
                       variableContent2=variableContent.get(variablesList.get(i+j));
          if(variableContent1!=null)
          {
          if(variableContent2!=null)
          {
-          ok=Source.distinctVariables(variableContent1,variableContent2);
+          //here we memorize the distinct variables and their content
+           variablesAndContent1= varI+" is:"+
+                                 Source.showVariableContent(variableContent1)
+                   +" [and] "+varIplusJ+" is:"+
+                                 Source.showVariableContent(variableContent2);
+          this.generateDistinctRequirements(variableContent1,
+                                                              variableContent2);
+          ok2=Source.distinctVariables(variableContent1,variableContent2);
+          if (!ok2){ Source.errorNewLine("Distinct variable violation at: "
+                  +varI+" and "+varIplusJ);
+                   Source.errorNewLine(varI+" is:"+
+                                 Source.showVariableContent(variableContent1));
+                   Source.errorNewLine(varIplusJ+" is:"+
+                                 Source.showVariableContent(variableContent2));
+                   ok=false;
+                  }
          }
          }
-        if(ok==false){break;}
+        
         }
-    if(ok==false){break;}
+    
     }
     }
     return ok;
+}
+public void checkDistinctReq(List<String> variablesList,
+                                             List<DistinctRequirement> listDR0)
+{
+    //here we check if distinct requirements are already defined
+    
+    //variablesList = list of distinct variables
+    int n=variablesList.size();
+    List<DistinctRequirement> toRemove=new ArrayList<DistinctRequirement>();
+    if(n>1)
+    {
+    for(int i=0;i<n-1;i++)
+    {
+        for(int j=1;j<n-i;j++)
+        {
+          String varI=variablesList.get(i);
+          String varIplusJ=variablesList.get(i+j);
+          int d=listDR0.size();
+          toRemove.clear();
+          for(int i2=0;i2<d;i2++)
+          {
+            String v1=listDR0.get(i2).distinctV1;
+            String v2=listDR0.get(i2).distinctV2;
+
+            if(
+               ((varI.equals(v1))&(varIplusJ.equals(v2)))|
+               ((varI.equals(v2))&(varIplusJ.equals(v1)))
+              )
+            {
+                //System.out.println("Remove: "+v1+" / "+v2);
+                DistinctRequirement dri2=listDR0.get(i2);
+                toRemove.add(dri2);
+                
+            }
+            
+          }
+          listDR0.removeAll(toRemove);
+
+
+
+        }
+
+    }
+    }
+  
 }
 static public boolean stringStartsWith(String s,String beginning)
 {
@@ -5064,6 +5268,21 @@ static public boolean stringEqualWithString(String s1,String s2)
 
    return ok;
 }
+public String displayCV(List<ConstantAndVariable> list)
+ {
+    String res="";
+    if(list!=null)
+    {
+    int max=list.size();
+    for(int i=0;i<max;i++)
+    {
+    res=res+" "+list.get(i).constantOrVariableText;    
+    }
+    
+    }
+   return res; 
+ }
+
 
 
 };

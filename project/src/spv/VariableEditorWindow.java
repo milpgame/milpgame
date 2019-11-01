@@ -10,7 +10,7 @@ import javax.swing.AbstractListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JFrame;
-
+import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 import java.util.List;
@@ -23,6 +23,12 @@ import spv.gen.Hypothesis;
 import spv.gen.Axiom;
 import spv.gen.Theorem;
 import spv.gen.ConstantAndVariable;
+import java.util.StringTokenizer;
+import javax.swing.text.StyledDocument;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.BadLocationException;
+import java.awt.Color;
 
 public class VariableEditorWindow extends javax.swing.JDialog {
 
@@ -37,6 +43,59 @@ public class VariableEditorWindow extends javax.swing.JDialog {
 
          Application0 a=(Application0)Application.getInstance();
 
+         //we initializes the constants
+
+          listConstants0.clear();
+
+          if (a.frame0!=null)
+          {
+          if (a.frame0.source1!=null)
+             {
+           if (a.frame0.source1.constants!=null)
+             {
+
+                Iterator<String> it=a.frame0.source1.constants.iterator();
+               while(it.hasNext())
+               {
+                String s1=it.next();
+                listConstants0.add(s1);
+
+
+                }
+              }
+             }
+            }
+         ListConstants.setModel(new ModelListConstants());
+         ListConstants.revalidate();
+         ListConstants.repaint();
+
+         //end constants
+
+         //initializes the variables
+          listVariables0.clear();
+
+          if (a.frame0!=null)
+          {
+          if (a.frame0.source1!=null)
+             {
+           if (a.frame0.source1.variables!=null)
+             {
+
+                Iterator<String> it=a.frame0.source1.variables.iterator();
+               while(it.hasNext())
+               {
+                String s1=it.next();
+                listVariables0.add(s1);
+
+
+                }
+              }
+             }
+            }
+         listVariables.setModel(new ModelListVariables());
+         listVariables.revalidate();
+         listVariables.repaint();
+         //end variables
 
          if (a!=null)
          {
@@ -114,6 +173,11 @@ public class VariableEditorWindow extends javax.swing.JDialog {
         moveDownContentButton = new javax.swing.JButton();
         moveUpContentButton = new javax.swing.JButton();
         applyButton = new javax.swing.JButton();
+        searchInConstantsText = new javax.swing.JTextField();
+        searchInVariablesText = new javax.swing.JTextField();
+        importButton = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        textPane = new javax.swing.JTextPane();
         variableNameNonfuncttionalLabel = new javax.swing.JLabel();
         variableNameLabel = new javax.swing.JLabel();
         correctnessLabel = new javax.swing.JLabel();
@@ -122,6 +186,7 @@ public class VariableEditorWindow extends javax.swing.JDialog {
         scrollContent = new javax.swing.JScrollPane();
         variableContentLabel = new javax.swing.JLabel();
         syntaxButton = new javax.swing.JButton();
+        verifyButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Edit content of a variable"); // NOI18N
@@ -220,13 +285,44 @@ public class VariableEditorWindow extends javax.swing.JDialog {
 
         applyButton.setForeground(resourceMap.getColor("applyButton.foreground")); // NOI18N
         applyButton.setText("Apply"); // NOI18N
-        applyButton.setEnabled(false);
         applyButton.setName("applyButton"); // NOI18N
         applyButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 applyButtonActionPerformed(evt);
             }
         });
+
+        searchInConstantsText.setForeground(resourceMap.getColor("searchInConstantsText.foreground")); // NOI18N
+        searchInConstantsText.setText(resourceMap.getString("searchInConstantsText.text")); // NOI18N
+        searchInConstantsText.setName("searchInConstantsText"); // NOI18N
+        searchInConstantsText.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                searchInConstantsTextKeyTyped(evt);
+            }
+        });
+
+        searchInVariablesText.setForeground(resourceMap.getColor("searchInVariablesText.foreground")); // NOI18N
+        searchInVariablesText.setText(resourceMap.getString("searchInVariablesText.text")); // NOI18N
+        searchInVariablesText.setName("searchInVariablesText"); // NOI18N
+        searchInVariablesText.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                searchInVariablesTextKeyTyped(evt);
+            }
+        });
+
+        importButton.setForeground(resourceMap.getColor("importButton.foreground")); // NOI18N
+        importButton.setText(resourceMap.getString("importButton.text")); // NOI18N
+        importButton.setName("importButton"); // NOI18N
+        importButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importButtonActionPerformed(evt);
+            }
+        });
+
+        jScrollPane1.setName("jScrollPane1"); // NOI18N
+
+        textPane.setName("textPane"); // NOI18N
+        jScrollPane1.setViewportView(textPane);
 
         javax.swing.GroupLayout directEditingPanelLayout = new javax.swing.GroupLayout(directEditingPanel);
         directEditingPanel.setLayout(directEditingPanelLayout);
@@ -235,32 +331,43 @@ public class VariableEditorWindow extends javax.swing.JDialog {
             .addGroup(directEditingPanelLayout.createSequentialGroup()
                 .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(directEditingPanelLayout.createSequentialGroup()
-                        .addGap(49, 49, 49)
-                        .addComponent(insertConstantButton))
+                        .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, directEditingPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE)
+                                    .addComponent(searchInConstantsText, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE)
+                                    .addComponent(constantsTableNonfunctionalLabel))
+                                .addGap(53, 53, 53)
+                                .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(variablesTableNonfunctionalLabel)
+                                    .addGroup(directEditingPanelLayout.createSequentialGroup()
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 162, Short.MAX_VALUE))
+                                    .addComponent(searchInVariablesText))
+                                .addGap(48, 48, 48))
+                            .addGroup(directEditingPanelLayout.createSequentialGroup()
+                                .addGap(64, 64, 64)
+                                .addComponent(insertConstantButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 135, Short.MAX_VALUE)
+                                .addComponent(insertVariableButton, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(91, 91, 91)))
+                        .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(contentTableNonfunctionalLabel)
+                            .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(moveUpContentButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(moveDownContentButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(deleteContentButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(applyButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 128, Short.MAX_VALUE))))
                     .addGroup(directEditingPanelLayout.createSequentialGroup()
                         .addContainerGap()
-                        .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(constantsTableNonfunctionalLabel)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(directEditingPanelLayout.createSequentialGroup()
-                        .addGap(53, 53, 53)
-                        .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(variablesTableNonfunctionalLabel))
-                        .addGap(51, 51, 51))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, directEditingPanelLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(insertVariableButton, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(87, 87, 87)))
-                .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(applyButton, javax.swing.GroupLayout.DEFAULT_SIZE, 146, Short.MAX_VALUE)
-                    .addComponent(contentTableNonfunctionalLabel)
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(moveUpContentButton, javax.swing.GroupLayout.DEFAULT_SIZE, 146, Short.MAX_VALUE)
-                    .addComponent(moveDownContentButton, javax.swing.GroupLayout.DEFAULT_SIZE, 146, Short.MAX_VALUE)
-                    .addComponent(deleteContentButton, javax.swing.GroupLayout.DEFAULT_SIZE, 146, Short.MAX_VALUE))
-                .addGap(42, 42, 42))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 596, Short.MAX_VALUE)))
+                .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, directEditingPanelLayout.createSequentialGroup()
+                .addContainerGap(198, Short.MAX_VALUE)
+                .addComponent(importButton, javax.swing.GroupLayout.PREFERRED_SIZE, 265, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(153, 153, 153))
         );
         directEditingPanelLayout.setVerticalGroup(
             directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -273,24 +380,32 @@ public class VariableEditorWindow extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(directEditingPanelLayout.createSequentialGroup()
-                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 306, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(moveUpContentButton)
-                        .addGap(2, 2, 2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(moveDownContentButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(deleteContentButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(applyButton))
+                        .addComponent(deleteContentButton))
                     .addGroup(directEditingPanelLayout.createSequentialGroup()
-                        .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 390, Short.MAX_VALUE)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(9, 9, 9)
+                        .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(searchInConstantsText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(searchInVariablesText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(insertConstantButton)
-                            .addComponent(insertVariableButton))))
-                .addGap(24, 24, 24))
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 163, Short.MAX_VALUE)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 163, Short.MAX_VALUE))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(applyButton)
+                    .addComponent(insertVariableButton)
+                    .addComponent(insertConstantButton))
+                .addGap(13, 13, 13)
+                .addComponent(importButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(26, 26, 26))
         );
 
         editingTab.addTab("Edit content directly", directEditingPanel);
@@ -331,6 +446,15 @@ public class VariableEditorWindow extends javax.swing.JDialog {
             }
         });
 
+        verifyButton.setForeground(resourceMap.getColor("verifyButton.foreground")); // NOI18N
+        verifyButton.setText(resourceMap.getString("verifyButton.text")); // NOI18N
+        verifyButton.setName("verifyButton"); // NOI18N
+        verifyButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                verifyButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -340,7 +464,9 @@ public class VariableEditorWindow extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(correctnessLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 416, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 313, Short.MAX_VALUE)
+                        .addComponent(verifyButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(syntaxButton))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(variableNameNonfuncttionalLabel)
@@ -366,14 +492,16 @@ public class VariableEditorWindow extends javax.swing.JDialog {
                     .addComponent(variableClassLabel)
                     .addComponent(variableClassNonfunctionalLabel)
                     .addComponent(variableNameNonfuncttionalLabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(variableContentNonfunctionalLabel)
                     .addComponent(scrollContent, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(correctnessLabel)
-                    .addComponent(syntaxButton))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(syntaxButton)
+                        .addComponent(verifyButton)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(editingTab, javax.swing.GroupLayout.PREFERRED_SIZE, 494, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -397,7 +525,7 @@ public class VariableEditorWindow extends javax.swing.JDialog {
        listContent.updateUI();
 
        //we modify the label of the edited variable
-       String s="";
+       String s="";String x="";
        int max=variableContent.size();
       Application0 a=(Application0)Application.getInstance();
        for (int i=0;i<max;i++)
@@ -418,6 +546,7 @@ public class VariableEditorWindow extends javax.swing.JDialog {
         }
         if (s2==null) s2=s1;
         s=s+s2;
+        x=x+s1+" ";
        }
 
       s =s.replaceAll("ALIGN=TOP","ALIGN=CENTER");
@@ -430,27 +559,8 @@ public class VariableEditorWindow extends javax.swing.JDialog {
      +"</P>"
      +"</HTML>";
       variableContentLabel.setText(s);
-      //correctness verification of the content of the variable
-      SyntacticItem syntacticTree=new SyntacticItem();
-       correct=a.frame0.source1.verifySyntacticType
-                                            (
-                                            variableContent,
-                                            this.variableClass,
-                                            0,
-                                            true,
-                                            syntacticTree
-                                            );
-
-      if (correct)
-      {
-         this.correctnessLabel.setText("Entered formula is:correct!");
-         this.applyButton.setEnabled(true);
-      }
-      else
-      {
-         this.correctnessLabel.setText("Entered formula is:incorrect!");
-         this.applyButton.setEnabled(false);
-      }
+      this.textPane.setText(x);
+      
       this.ListConstants.clearSelection();
      
       }
@@ -483,7 +593,7 @@ public class VariableEditorWindow extends javax.swing.JDialog {
 
        listContent.updateUI();
          //we modify the label of the variable content
-        String s="";
+        String s="";String x="";
        int max=variableContent.size();
       
        for (int i=0;i<max;i++)
@@ -504,6 +614,7 @@ public class VariableEditorWindow extends javax.swing.JDialog {
         }
         if (s2==null) s2=s1;
         s=s+s2;
+        x=x+s1+" ";
        }
 
       s =s.replaceAll("ALIGN=TOP","ALIGN=CENTER");
@@ -516,26 +627,8 @@ public class VariableEditorWindow extends javax.swing.JDialog {
      +"</P>"
      +"</HTML>";
       variableContentLabel.setText(s);
-      SyntacticItem syntacticTree=new SyntacticItem();
-      correct=a.frame0.source1.verifySyntacticType
-                                            (
-                                            variableContent,
-                                            this.variableClass,
-                                            0,
-                                            true,
-                                            syntacticTree
-                                            );
+      this.textPane.setText(x);
 
-      if (correct)
-      {
-         this.correctnessLabel.setText("Entered formula is:correct!");
-         this.applyButton.setEnabled(true);
-      }
-      else
-      {
-         this.correctnessLabel.setText("Entered formula is:incorrect!");
-         this.applyButton.setEnabled(false);
-      }
       this.listVariables.clearSelection();
      }
     }//GEN-LAST:event_insertVariableButtonActionPerformed
@@ -548,7 +641,7 @@ public class VariableEditorWindow extends javax.swing.JDialog {
         variableContent.remove(selectedRowContent);
         listContent.updateUI();
         //we modify the label of the variable content
-        String s="";
+        String s="";String x="";
        int max=variableContent.size();
         Application0 a=(Application0)Application.getInstance();
        for (int i=0;i<max;i++)
@@ -569,6 +662,7 @@ public class VariableEditorWindow extends javax.swing.JDialog {
         }
         if (s2==null) s2=s1;
         s=s+s2;
+        x=x+s1+" ";
        }
 
       s =s.replaceAll("ALIGN=TOP","ALIGN=CENTER");
@@ -581,30 +675,8 @@ public class VariableEditorWindow extends javax.swing.JDialog {
      +"</P>"
      +"</HTML>";
       variableContentLabel.setText(s);
-      SyntacticItem syntacticTree=new SyntacticItem();
-      correct=false;
-      if(!variableContent.isEmpty())
-      {
-        correct=a.frame0.source1.verifySyntacticType
-                                            (
-                                            variableContent,
-                                            this.variableClass,
-                                            0,
-                                            true,
-                                            syntacticTree
-                                            );
-       }
+      this.textPane.setText(x);
 
-      if (correct)
-      {
-         this.correctnessLabel.setText("Entered formula is:correct!");
-         this.applyButton.setEnabled(true);
-      }
-      else
-      {
-         this.correctnessLabel.setText("Entered formula is:incorrect!");
-         this.applyButton.setEnabled(false);
-      }
      listContent.clearSelection();
      }
     }//GEN-LAST:event_deleteContentButtonActionPerformed
@@ -644,7 +716,7 @@ public class VariableEditorWindow extends javax.swing.JDialog {
         variableContent.set(selectedRowContent-1, ci);
         listContent.updateUI();
         //we modify the label of variable content
-        String s="";
+        String s="";String x="";
        int max1=variableContent.size();
         Application0 a=(Application0)Application.getInstance();
        for (int i=0;i<max1;i++)
@@ -665,6 +737,7 @@ public class VariableEditorWindow extends javax.swing.JDialog {
         }
         if (s2==null) s2=s1;
         s=s+s2;
+        x=x+s1+" ";
        }
 
       s =s.replaceAll("ALIGN=TOP","ALIGN=CENTER");
@@ -677,27 +750,10 @@ public class VariableEditorWindow extends javax.swing.JDialog {
      +"</P>"
      +"</HTML>";
       variableContentLabel.setText(s);
-      SyntacticItem syntacticTree=new SyntacticItem();
-      correct=a.frame0.source1.verifySyntacticType
-                                            (
-                                            variableContent,
-                                            this.variableClass,
-                                            0,
-                                            true,
-                                            syntacticTree
-                                            );
+      this.textPane.setText(x);
 
-      if (correct)
-      {
-         this.correctnessLabel.setText("Entered formula is:correct!");
-         this.applyButton.setEnabled(true);
-      }
-      else
-      {
-         this.correctnessLabel.setText("Entered formula is:incorrect!");
-         this.applyButton.setEnabled(false);
-      }
       listContent.clearSelection();
+      listContent.setSelectedIndex(selectedRowContent-1);
       }
 
 
@@ -738,7 +794,7 @@ public class VariableEditorWindow extends javax.swing.JDialog {
         variableContent.set(selectedRowContent+1, ci);
         listContent.updateUI();
         //we modify the label of variable content
-        String s="";
+        String s="";String x="";
        int max1=variableContent.size();
        Application0 a=(Application0)Application.getInstance();
        for (int i=0;i<max1;i++)
@@ -759,6 +815,7 @@ public class VariableEditorWindow extends javax.swing.JDialog {
         }
         if (s2==null) s2=s1;
         s=s+s2;
+        x=x+s1+" ";
        }
 
       s =s.replaceAll("ALIGN=TOP","ALIGN=CENTER");
@@ -771,8 +828,24 @@ public class VariableEditorWindow extends javax.swing.JDialog {
      +"</P>"
      +"</HTML>";
       variableContentLabel.setText(s);
+      this.textPane.setText(x);
+
+      listContent.clearSelection();
+      listContent.setSelectedIndex(selectedRowContent+1);
+      }
+
+    }//GEN-LAST:event_moveDownContentButtonActionPerformed
+
+    private void applyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applyButtonActionPerformed
+    
+      if(variableContent!=null)
+      {
+      if(!variableContent.isEmpty())
+      {
+        //correctness verification of the content of the variable
       SyntacticItem syntacticTree=new SyntacticItem();
-      correct=a.frame0.source1.verifySyntacticType
+      Application0 a=(Application0)Application.getInstance();
+       correct=a.frame0.source1.verifySyntacticType
                                             (
                                             variableContent,
                                             this.variableClass,
@@ -784,20 +857,18 @@ public class VariableEditorWindow extends javax.swing.JDialog {
       if (correct)
       {
          this.correctnessLabel.setText("Entered formula is:correct!");
-         this.applyButton.setEnabled(true);
+         
       }
       else
       {
          this.correctnessLabel.setText("Entered formula is:incorrect!");
-         this.applyButton.setEnabled(false);
+        
       }
-      listContent.clearSelection();
-      }
-
-    }//GEN-LAST:event_moveDownContentButtonActionPerformed
-
-    private void applyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applyButtonActionPerformed
-       
+    }
+    }
+    
+   if (correct)
+    {
         //we modify the content of the help variable
         Application0 a=(Application0)Application.getInstance();
       if (a!=null)
@@ -844,6 +915,14 @@ public class VariableEditorWindow extends javax.swing.JDialog {
 
 
       this.dispose();
+    }
+   else
+   {
+      JOptionPane.showMessageDialog
+              (this, "The content of the variable is not correct!");
+   }
+
+        
 
     }//GEN-LAST:event_applyButtonActionPerformed
 
@@ -854,6 +933,265 @@ public class VariableEditorWindow extends javax.swing.JDialog {
 
         Application0.getApplication().show(syntaxWindow);
     }//GEN-LAST:event_syntaxButtonActionPerformed
+
+    private void searchInConstantsTextKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchInConstantsTextKeyTyped
+
+     Application0 a=(Application0)Application.getInstance();
+
+          listConstants0.clear();
+
+          if (a.frame0!=null)
+          {
+          if (a.frame0.source1!=null)
+             {
+           if (a.frame0.source1.constants!=null)
+             {
+
+                Iterator<String> it=a.frame0.source1.constants.iterator();
+               while(it.hasNext())
+               {
+                String s1=it.next();
+                if(s1.indexOf(this.searchInConstantsText.getText())>-1)
+                {
+                listConstants0.add(s1);
+                }
+
+
+                }
+              }
+             }
+            }
+         ListConstants.setModel(new ModelListConstants());
+         ListConstants.revalidate();
+         ListConstants.repaint();   
+
+    }//GEN-LAST:event_searchInConstantsTextKeyTyped
+
+    private void searchInVariablesTextKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchInVariablesTextKeyTyped
+
+     Application0 a=(Application0)Application.getInstance();
+
+          listVariables0.clear();
+
+          if (a.frame0!=null)
+          {
+          if (a.frame0.source1!=null)
+             {
+           if (a.frame0.source1.variables!=null)
+             {
+
+                Iterator<String> it=a.frame0.source1.variables.iterator();
+               while(it.hasNext())
+               {
+                String s1=it.next();
+                if(s1.indexOf(this.searchInVariablesText.getText())>-1)
+                {
+                listVariables0.add(s1);
+                }
+
+
+                }
+              }
+             }
+            }
+         listVariables.setModel(new ModelListVariables());
+         listVariables.revalidate();
+         listVariables.repaint();
+
+
+    }//GEN-LAST:event_searchInVariablesTextKeyTyped
+
+    private void verifyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_verifyButtonActionPerformed
+
+      if(variableContent!=null)
+      {
+      if(!variableContent.isEmpty())
+      {
+        //correctness verification of the content of the variable
+      SyntacticItem syntacticTree=new SyntacticItem();
+      Application0 a=(Application0)Application.getInstance();
+       correct=a.frame0.source1.verifySyntacticType
+                                            (
+                                            variableContent,
+                                            this.variableClass,
+                                            0,
+                                            true,
+                                            syntacticTree
+                                            );
+
+      if (correct)
+      {
+         this.correctnessLabel.setText("Entered formula is:correct!");
+         
+      }
+      else
+      {
+         this.correctnessLabel.setText("Entered formula is:incorrect!");
+        
+      }
+    }
+    }
+
+    }//GEN-LAST:event_verifyButtonActionPerformed
+
+    private void importButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importButtonActionPerformed
+       Application0 a=(Application0)Application.getInstance();
+     StyledDocument doc=this.textPane.getStyledDocument();
+     Style style=this.textPane.addStyle("red style", null);
+     StyleConstants.setForeground(style, Color.red);
+
+     String inputText=this.textPane.getText();
+     StringTokenizer st=new StringTokenizer(inputText," ");
+     this.textPane.setText("");//we clear the text
+
+     List<ConstantAndVariable>  importedFormula = new
+                                              ArrayList<ConstantAndVariable>();
+     boolean correctWords=true;
+
+     while(st.hasMoreTokens())
+     {
+      String si=st.nextToken();
+
+      boolean stringFound=false;
+
+               Iterator<String> it1=a.frame0.source1.constants.iterator();
+               while(it1.hasNext())
+               {
+                String constI=it1.next();
+                if(constI.equals(si))
+                {
+                 ConstantAndVariable c=new ConstantAndVariable();
+                 c.constantOrVariable=1;
+                 c.constantOrVariableText=si;
+                 importedFormula.add(c);
+                 stringFound=true;
+                 break;
+                }
+                }
+
+               Iterator<String> it2=a.frame0.source1.variables.iterator();
+               while(it2.hasNext())
+               {
+                String varI=it2.next();
+                if(varI.equals(si))
+                {
+                 ConstantAndVariable v=new ConstantAndVariable();
+                 v.constantOrVariable=2;
+                 v.constantOrVariableText=si;
+                 if (a.frame0!=null)
+                  {
+                  if (a.frame0.source1!=null)
+                     {
+                   if (a.frame0.source1.variableAndType!=null)
+                   {
+
+                     v.variableClass=a.frame0.source1.variableAndType.
+                                                  get(v.constantOrVariableText);
+                   }
+                   }
+                   }
+                 importedFormula.add(v);
+                 stringFound=true;
+                 break;
+                }
+                }
+
+     if(!stringFound)
+     {
+         try
+           {
+            doc.insertString(doc.getLength(), si, style);
+            doc.insertString(doc.getLength(), " ", null);
+
+           } catch(BadLocationException e){}
+
+         correctWords=false;
+     }
+     else
+     {
+
+        try
+           {
+            doc.insertString(doc.getLength(), si, null);
+            doc.insertString(doc.getLength(), " ", null);
+
+           } catch(BadLocationException e){}
+     }
+
+
+     }
+     if(correctWords)
+     {
+       //redisplay formulaContent
+       variableContent=importedFormula;
+
+       listContent.updateUI();
+
+        String s="";
+       int max=variableContent.size();
+
+       for (int i=0;i<max;i++)
+       {
+        String  s2="",s1=variableContent.get(i).constantOrVariableText;
+        if(a!=null)
+        {
+         if (a.frame0!=null)
+         {
+           if (a.frame0.source1!=null)
+           {
+           if (a.frame0.source1.htlmldefString1AsString2!=null)
+           {
+             s2=a.frame0.source1.htlmldefString1AsString2.get(s1);
+           }
+           }
+         }
+        }
+        if (s2==null) s2=s1;
+
+        s=s+s2;
+       }
+
+      s =s.replaceAll("ALIGN=TOP","ALIGN=CENTER");
+     s="<HTML>"
+     +"<base href='file:"+a.path+"/symbols/  '/>"
+     +"<P CLASS='western' STYLE='margin-bottom: 0cm; background: #04ff81'>"
+     +"<FONT COLOR='#ffffff' SIZE=3 >"
+     +s
+     +"</FONT>"
+     +"</P>"
+     +"</HTML>";
+      variableContentLabel.setText(s);
+     //we verify syntactic correctness
+
+      if (variableContent!=null)
+     {
+     if (!variableContent.isEmpty())
+     {
+
+       SyntacticItem syntacticTree=new SyntacticItem();
+      boolean correct0=a.frame0.source1.verifySyntacticType
+                                            (
+                                            variableContent,
+                                            this.variableClass,
+                                            0,
+                                            true,
+                                            syntacticTree
+                                            );
+
+      if (correct0)
+      {
+         this.correctnessLabel.setText("Entered formula is:correct!");
+      }
+      else
+      {
+         this.correctnessLabel.setText("Entered formula is:incorrect!");
+      }
+
+      }
+      }
+     }
+
+    }//GEN-LAST:event_importButtonActionPerformed
 
     /**
     * @param args the command line arguments
@@ -881,8 +1219,10 @@ public class VariableEditorWindow extends javax.swing.JDialog {
     private javax.swing.JButton deleteContentButton;
     private javax.swing.JPanel directEditingPanel;
     private javax.swing.JTabbedPane editingTab;
+    public javax.swing.JButton importButton;
     private javax.swing.JButton insertConstantButton;
     private javax.swing.JButton insertVariableButton;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
@@ -891,7 +1231,10 @@ public class VariableEditorWindow extends javax.swing.JDialog {
     private javax.swing.JButton moveDownContentButton;
     private javax.swing.JButton moveUpContentButton;
     private javax.swing.JScrollPane scrollContent;
+    private javax.swing.JTextField searchInConstantsText;
+    private javax.swing.JTextField searchInVariablesText;
     private javax.swing.JButton syntaxButton;
+    public javax.swing.JTextPane textPane;
     private javax.swing.JLabel variableClassLabel;
     private javax.swing.JLabel variableClassNonfunctionalLabel;
     private javax.swing.JLabel variableContentLabel;
@@ -899,6 +1242,7 @@ public class VariableEditorWindow extends javax.swing.JDialog {
     private javax.swing.JLabel variableNameLabel;
     private javax.swing.JLabel variableNameNonfuncttionalLabel;
     private javax.swing.JLabel variablesTableNonfunctionalLabel;
+    private javax.swing.JButton verifyButton;
     // End of variables declaration//GEN-END:variables
     
     //here are stored the name and the content of the variable
@@ -921,29 +1265,8 @@ public class VariableEditorWindow extends javax.swing.JDialog {
      
       public ModelListConstants()
       {
-          //here we reset the table
-          
-          Application0 a=(Application0)Application.getInstance();
-          
-          if (a.frame0!=null)
-          {
-          if (a.frame0.source1!=null)
-             {
-           if (a.frame0.source1.constants!=null)
-             {
-             
-                Iterator<String> it=a.frame0.source1.constants.iterator();
-               while(it.hasNext())
-               {
-                String s1=it.next();
-                listConstants0.add(s1);
-                 
-                
-                }
-              }
-             }
-            }
-        }
+        
+      }
        
       public String getElementAt(int line)
       {
@@ -955,7 +1278,7 @@ public class VariableEditorWindow extends javax.swing.JDialog {
                String s2="",s1=listConstants0.get(line);
                 s2=a.frame0.source1.htlmldefString1AsString2.get(s1);
                 if (s2==null) s2=s1;
-                s2="("+line+")"+s2;
+                s2="("+line+"|"+s1+")"+s2;
                 s2=s2.replaceAll("ALIGN=TOP","ALIGN=CENTER");
                 s2="<HTML>"
                  +"<base href='file:"+a.path+"/symbols/  '/>"
@@ -1029,28 +1352,8 @@ public class VariableEditorWindow extends javax.swing.JDialog {
 
       public ModelListVariables()
       {
-          //here we reset the table
-          
-          Application0 a=(Application0)Application.getInstance();
-
-          if (a.frame0!=null)
-          {
-          if (a.frame0.source1!=null)
-             {
-           if (a.frame0.source1.variables!=null)
-           {
-                Iterator<String> it=a.frame0.source1.variables.iterator();
-
-               while(it.hasNext())
-               {
-                String s1=it.next();
-                listVariables0.add(s1);
-                                 
-                }
-              }
-             }
-            }
-        }
+         
+      }
 
       public String getElementAt(int line)
       {
@@ -1062,7 +1365,7 @@ public class VariableEditorWindow extends javax.swing.JDialog {
                s2=a.frame0.source1.htlmldefString1AsString2.get(s1);
                 if (s2==null) s2=s1;
                 String s3=a.frame0.source1.variableAndType.get(s1);
-                s2="("+line+")"+s2+"["+s3+"]";
+                s2="("+line+"|"+s1+")"+s2+"["+s3+"]";
                 
                 s2=s2.replaceAll("ALIGN=TOP","ALIGN=CENTER");
                 s2="<HTML>"

@@ -155,12 +155,14 @@ public class MainWindow extends FrameView {
         addExistingStatementButton = new javax.swing.JButton();
         propertiesButton = new javax.swing.JButton();
         syntaxButton = new javax.swing.JButton();
+        fillButton = new javax.swing.JButton();
         statePanel = new javax.swing.JPanel();
         javax.swing.JSeparator statePillar = new javax.swing.JSeparator();
         stateMessageLabel = new javax.swing.JLabel();
         stateAnimationLabel = new javax.swing.JLabel();
         progressBar = new javax.swing.JProgressBar();
         colors = new javax.swing.JLabel();
+        textField = new javax.swing.JTextField();
 
         mainPanel.setName("mainPanel"); // NOI18N
         mainPanel.setPreferredSize(new java.awt.Dimension(670, 550));
@@ -177,9 +179,9 @@ public class MainWindow extends FrameView {
         filesPanel.setName("Panou_fisier_menu"); // NOI18N
 
         openButton.setBackground(new java.awt.Color(4, 255, 129));
-        openButton.setFont(new java.awt.Font("Tahoma", 1, 11));
-        openButton.setForeground(new java.awt.Color(255, 255, 255));
         org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(spv.Application0.class).getContext().getResourceMap(MainWindow.class);
+        openButton.setFont(resourceMap.getFont("bDeschide.font")); // NOI18N
+        openButton.setForeground(resourceMap.getColor("bDeschide.foreground")); // NOI18N
         openButton.setText(resourceMap.getString("bDeschide.text")); // NOI18N
         openButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         openButton.setName("bDeschide"); // NOI18N
@@ -211,8 +213,8 @@ public class MainWindow extends FrameView {
         viewPanel.setName("panou_ajutor"); // NOI18N
 
         helpButton.setBackground(new java.awt.Color(4, 255, 129));
-        helpButton.setFont(new java.awt.Font("Tahoma", 1, 11));
-        helpButton.setForeground(new java.awt.Color(255, 255, 255));
+        helpButton.setFont(resourceMap.getFont("bAjutor.font")); // NOI18N
+        helpButton.setForeground(resourceMap.getColor("bAjutor.foreground")); // NOI18N
         helpButton.setText(resourceMap.getString("bAjutor.text")); // NOI18N
         helpButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         helpButton.setName("bAjutor"); // NOI18N
@@ -225,8 +227,8 @@ public class MainWindow extends FrameView {
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(spv.Application0.class).getContext().getActionMap(MainWindow.class, this);
         aboutButton.setAction(actionMap.get("showAboutBox")); // NOI18N
         aboutButton.setBackground(resourceMap.getColor("bDespre.background")); // NOI18N
-        aboutButton.setFont(new java.awt.Font("Tahoma", 1, 11));
-        aboutButton.setForeground(new java.awt.Color(255, 255, 255));
+        aboutButton.setFont(resourceMap.getFont("bDespre.font")); // NOI18N
+        aboutButton.setForeground(resourceMap.getColor("bDespre.foreground")); // NOI18N
         aboutButton.setText(resourceMap.getString("bDespre.text")); // NOI18N
         aboutButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         aboutButton.setName("bDespre"); // NOI18N
@@ -238,7 +240,7 @@ public class MainWindow extends FrameView {
             .addGroup(viewPanelLayout.createSequentialGroup()
                 .addGroup(viewPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(aboutButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(helpButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 39, Short.MAX_VALUE))
+                    .addComponent(helpButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 33, Short.MAX_VALUE))
                 .addGap(274, 274, 274))
         );
         viewPanelLayout.setVerticalGroup(
@@ -428,6 +430,20 @@ public class MainWindow extends FrameView {
         });
         toolsBar.add(syntaxButton);
 
+        fillButton.setForeground(resourceMap.getColor("fillButton.foreground")); // NOI18N
+        fillButton.setText(resourceMap.getString("fillButton.text")); // NOI18N
+        fillButton.setEnabled(false);
+        fillButton.setFocusable(false);
+        fillButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        fillButton.setName("fillButton"); // NOI18N
+        fillButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        fillButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fillButtonActionPerformed(evt);
+            }
+        });
+        toolsBar.add(fillButton);
+
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
@@ -437,8 +453,8 @@ public class MainWindow extends FrameView {
                 .addComponent(menuTab, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(32, 32, 32)
                 .addComponent(toolsBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(203, Short.MAX_VALUE))
-            .addComponent(filesTab, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 1092, Short.MAX_VALUE)
+                .addContainerGap(250, Short.MAX_VALUE))
+            .addComponent(filesTab, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 1234, Short.MAX_VALUE)
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -448,7 +464,7 @@ public class MainWindow extends FrameView {
                     .addComponent(menuTab, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(toolsBar, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(filesTab, javax.swing.GroupLayout.DEFAULT_SIZE, 552, Short.MAX_VALUE))
+                .addComponent(filesTab, javax.swing.GroupLayout.DEFAULT_SIZE, 550, Short.MAX_VALUE))
         );
 
         filesTab.getAccessibleContext().setAccessibleName(resourceMap.getString("Tabul1.AccessibleContext.accessibleName")); // NOI18N
@@ -468,20 +484,28 @@ public class MainWindow extends FrameView {
         colors.setText("<html><font size=\"-1\"><b>Colors of\nvariables:</b>  <span class=\"wff\" style=\"color:blue;font-style:normal\">wff</span>\n<span class=\"set\" style=\"color:red;font-style:normal\">set</span> <span class=\"class\" style=\"color:#f226bf;font-\nstyle:normal\">class</span></font></html>"); // NOI18N
         colors.setName("colors"); // NOI18N
 
+        textField.setText(resourceMap.getString("textField.text")); // NOI18N
+        textField.setName("textField"); // NOI18N
+
         javax.swing.GroupLayout statePanelLayout = new javax.swing.GroupLayout(statePanel);
         statePanel.setLayout(statePanelLayout);
         statePanelLayout.setHorizontalGroup(
             statePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(statePanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(stateMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(colors, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(statePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(statePanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(stateMessageLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(colors, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(statePanelLayout.createSequentialGroup()
+                        .addGap(65, 65, 65)
+                        .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(statePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(statePillar, javax.swing.GroupLayout.DEFAULT_SIZE, 885, Short.MAX_VALUE)
+                    .addComponent(statePillar, javax.swing.GroupLayout.DEFAULT_SIZE, 1027, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, statePanelLayout.createSequentialGroup()
-                        .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(textField, javax.swing.GroupLayout.DEFAULT_SIZE, 1013, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(stateAnimationLabel)
                         .addContainerGap())))
@@ -490,12 +514,15 @@ public class MainWindow extends FrameView {
             statePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(statePanelLayout.createSequentialGroup()
                 .addComponent(statePillar, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
-                .addGroup(statePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(stateMessageLabel)
-                    .addComponent(stateAnimationLabel)
-                    .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(3, 3, 3))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(statePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(statePanelLayout.createSequentialGroup()
+                        .addGroup(statePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(stateMessageLabel)
+                            .addComponent(stateAnimationLabel)
+                            .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(3, 3, 3))
+                    .addComponent(textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
             .addGroup(statePanelLayout.createSequentialGroup()
                 .addComponent(colors, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -753,7 +780,8 @@ public class MainWindow extends FrameView {
 
      }
     }//GEN-LAST:event_openButtonActionPerformed
-private void fillButtonActionPerformed__(java.awt.event.ActionEvent evt) {
+
+    private void fillButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fillButtonActionPerformed
 
      if (this.currentDemonstrationEditor!=null)
          {
@@ -772,13 +800,15 @@ private void fillButtonActionPerformed__(java.awt.event.ActionEvent evt) {
               AppliedItem aii=new AppliedItem();
               aii.name=hypi.name;
               aii.type=DemonstrationConstants.PROPER_HYPOTHESIS;
-              aii.priority=-1;
+              aii.priority=-(hypi.items.size())-20000;
               this.listOfAppliedItems.add(aii);
 
               }
             }
             }
-        //we add to the List of Rules axioms
+            //we clear the list of loop rules
+            this.currentDemonstrationEditor.loopRules.clear();
+            //we add to the List of Rules axioms
             if (this.currentDemonstrationEditor.S.axioms!=null)
             {
              java.util.Iterator<Object>
@@ -791,12 +821,29 @@ private void fillButtonActionPerformed__(java.awt.event.ActionEvent evt) {
               if(axi.type==1)
               {
               aii.type=DemonstrationConstants.SIMPLE_AXIOM;
-              aii.priority=0;
+              aii.priority=-(axi.items.size());
               }
               else if(axi.type==2)
               {
+              
+               if(axi.hypotheses.size()==1)
+               {
+                if (this.currentDemonstrationEditor.isALoopRule(axi.name,(byte)0))
+                {
+                this.currentDemonstrationEditor.loopRules.add(axi.name);
+                 //System.out.println(axi.name+" is a loop rule(axiom).");
+                }
+               }
+                
                aii.type=DemonstrationConstants.AXIOM_FROM_COMPOSED_AXIOM;
-               aii.priority=axi.hypotheses.size();
+               
+               int nomber=axi.hypotheses.size();
+               int sum=0;
+               for(int i=0;i<nomber;i++)
+               {
+                sum=sum+axi.hypotheses.get(i).items.size();
+               }
+               aii.priority=(float)(-axi.items.size())+(float)((float)sum/(float)(axi.items.size()));
               }
 
               this.listOfAppliedItems.add(aii);
@@ -816,12 +863,28 @@ private void fillButtonActionPerformed__(java.awt.event.ActionEvent evt) {
               if(thi.type==1)
               {
               aii.type=DemonstrationConstants.SIMPLE_THEOREM;
-              aii.priority=0;
+              aii.priority=-(thi.items.size());
               }
               else if(thi.type==2)
               {
+               
+               if(thi.hypotheses.size()==1)
+               {
+                if (this.currentDemonstrationEditor.isALoopRule(thi.name,(byte)0))
+                {
+                 this.currentDemonstrationEditor.loopRules.add(thi.name);
+                 //System.out.println(thi.name+" is a loop rule(theorem).");
+                }
+               }
+               
                aii.type=DemonstrationConstants.THEOREM_FROM_COMPOSED_THEOREM;
-               aii.priority=thi.hypotheses.size();
+               int nomber=thi.hypotheses.size();
+               int sum=0;
+               for(int i=0;i<nomber;i++)
+               {
+                sum=sum+thi.hypotheses.get(i).items.size();
+               }
+               aii.priority=(float)(-thi.items.size())+(float)((float)sum/(float)(thi.items.size()));
               }
 
               this.listOfAppliedItems.add(aii);
@@ -836,13 +899,13 @@ private void fillButtonActionPerformed__(java.awt.event.ActionEvent evt) {
            ok=true;
            for(int i=0;i<max0-1;i++)
            {
-            int priorityI=this.listOfAppliedItems.get(i).priority;
-            int priorityIp1=this.listOfAppliedItems.get(i+1).priority;
+            float priorityI=this.listOfAppliedItems.get(i).priority;
+            float priorityIp1=this.listOfAppliedItems.get(i+1).priority;
             if (priorityI>priorityIp1)
             {
              ok=false;
              String auxname=this.listOfAppliedItems.get(i).name;
-             int auxpriority=this.listOfAppliedItems.get(i).priority;
+             float auxpriority=this.listOfAppliedItems.get(i).priority;
              int auxtype=this.listOfAppliedItems.get(i).type;
 
              this.listOfAppliedItems.get(i).name=
@@ -865,8 +928,8 @@ private void fillButtonActionPerformed__(java.awt.event.ActionEvent evt) {
 
 
         }
+    }//GEN-LAST:event_fillButtonActionPerformed
 
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton aboutButton;
@@ -879,6 +942,7 @@ private void fillButtonActionPerformed__(java.awt.event.ActionEvent evt) {
     private javax.swing.JButton editVariablesButton;
     private javax.swing.JPanel filesPanel;
     public javax.swing.JTabbedPane filesTab;
+    private javax.swing.JButton fillButton;
     private javax.swing.JButton formulaButton;
     private javax.swing.JButton helpButton;
     public javax.swing.JButton listOfRulesButton;
@@ -894,6 +958,7 @@ private void fillButtonActionPerformed__(java.awt.event.ActionEvent evt) {
     private javax.swing.JLabel stateMessageLabel;
     private javax.swing.JPanel statePanel;
     private javax.swing.JButton syntaxButton;
+    public javax.swing.JTextField textField;
     private javax.swing.JToolBar toolsBar;
     private javax.swing.JPanel viewPanel;
     // End of variables declaration//GEN-END:variables

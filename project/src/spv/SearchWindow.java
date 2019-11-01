@@ -39,10 +39,60 @@ public class SearchWindow extends javax.swing.JDialog {
         buttonGroup1.add(this.nameTickButton);
         buttonGroup1.add(this.contentTickButton);
         
-       
+       //initializes the constants
          Application0 a=(Application0)Application.getInstance();
 
+          listConstants.clear();
 
+          if (a.frame0!=null)
+          {
+          if (a.frame0.source1!=null)
+             {
+           if (a.frame0.source1.constants!=null)
+             {
+
+                Iterator<String> it=a.frame0.source1.constants.iterator();
+               while(it.hasNext())
+               {
+                String s1=it.next();
+                listConstants.add(s1);
+
+
+                }
+              }
+             }
+            }
+         listOfConstants.setModel(new ListModelConstants());
+         listOfConstants.revalidate();
+         listOfConstants.repaint();
+         //end constants
+
+         //initializes the variables
+          listVariables.clear();
+
+          if (a.frame0!=null)
+          {
+          if (a.frame0.source1!=null)
+             {
+           if (a.frame0.source1.variables!=null)
+             {
+
+                Iterator<String> it=a.frame0.source1.variables.iterator();
+               while(it.hasNext())
+               {
+                String s1=it.next();
+                listVariables.add(s1);
+
+
+                }
+              }
+             }
+            }
+         listOfVariables.setModel(new ModelListVariables());
+         listOfVariables.revalidate();
+         listOfVariables.repaint();
+         //end variables
+         
          if (a!=null)
          {
           if (a.frame0!=null)
@@ -54,7 +104,27 @@ public class SearchWindow extends javax.swing.JDialog {
           //END go
           if (a.frame0.currentDemonstrationEditor!=null)
           {
-                         
+            //we insert into the searchContent the selected demonstration item
+              if(a.frame0.currentDemonstrationEditor.
+                                               selectedDemonstrationItem0!=null)
+              {
+               if(a.frame0.currentDemonstrationEditor.
+                                         selectedDemonstrationItem0.items!=null)
+               {
+                   //we copy the selected demonstration item 
+                   this.searchContent=Source.copyTheListOfConstantAndVariable(
+                                            a.frame0.currentDemonstrationEditor.
+                                               selectedDemonstrationItem0.items);
+                   if(this.searchContent!=null)
+                   {
+                   if(!this.searchContent.isEmpty())
+                   {
+                    //we remove |-
+                       this.searchContent.remove(0);
+                   }
+                   }
+               }
+              }
             //we modify content variable label
             String s="";
            int max=searchContent.size();
@@ -89,6 +159,11 @@ public class SearchWindow extends javax.swing.JDialog {
          +"</P>"
          +"</HTML>";
           searchContentLabel.setText(s);
+          listContent.updateUI();
+         
+
+          
+          
           }
           }
         }
@@ -124,6 +199,9 @@ public class SearchWindow extends javax.swing.JDialog {
         moveDownContentButton = new javax.swing.JButton();
         moveUpContentButton = new javax.swing.JButton();
         insertVariableButton = new javax.swing.JButton();
+        DeleteAllContentButton = new javax.swing.JButton();
+        searchInConstantsText = new javax.swing.JTextField();
+        searchInVariablesText = new javax.swing.JTextField();
         correctnessLabel = new javax.swing.JLabel();
         searchButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -138,6 +216,7 @@ public class SearchWindow extends javax.swing.JDialog {
         searchContentLabel = new javax.swing.JLabel();
         syntaxButton = new javax.swing.JButton();
         goButton = new javax.swing.JButton();
+        verifyButton = new javax.swing.JButton();
 
         org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(spv.Application0.class).getContext().getResourceMap(SearchWindow.class);
         checkbox1.setLabel(resourceMap.getString("checkbox1.label")); // NOI18N
@@ -252,6 +331,33 @@ public class SearchWindow extends javax.swing.JDialog {
             }
         });
 
+        DeleteAllContentButton.setForeground(resourceMap.getColor("DeleteAllContentButton.foreground")); // NOI18N
+        DeleteAllContentButton.setText(resourceMap.getString("DeleteAllContentButton.text")); // NOI18N
+        DeleteAllContentButton.setName("DeleteAllContentButton"); // NOI18N
+        DeleteAllContentButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                DeleteAllContentButtonActionPerformed(evt);
+            }
+        });
+
+        searchInConstantsText.setForeground(resourceMap.getColor("searchInConstantsText.foreground")); // NOI18N
+        searchInConstantsText.setText(resourceMap.getString("searchInConstantsText.text")); // NOI18N
+        searchInConstantsText.setName("searchInConstantsText"); // NOI18N
+        searchInConstantsText.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                searchInConstantsTextKeyTyped(evt);
+            }
+        });
+
+        searchInVariablesText.setForeground(resourceMap.getColor("searchInVariablesText.foreground")); // NOI18N
+        searchInVariablesText.setText(resourceMap.getString("searchInVariablesText.text")); // NOI18N
+        searchInVariablesText.setName("searchInVariablesText"); // NOI18N
+        searchInVariablesText.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                searchInVariablesTextKeyTyped(evt);
+            }
+        });
+
         javax.swing.GroupLayout directEditingPanelLayout = new javax.swing.GroupLayout(directEditingPanel);
         directEditingPanel.setLayout(directEditingPanelLayout);
         directEditingPanelLayout.setHorizontalGroup(
@@ -260,57 +366,71 @@ public class SearchWindow extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(directEditingPanelLayout.createSequentialGroup()
-                        .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(tableConstantsNonfunctionalLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 173, Short.MAX_VALUE)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, directEditingPanelLayout.createSequentialGroup()
-                        .addComponent(insertConstantButton)
-                        .addGap(43, 43, 43)))
+                    .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, directEditingPanelLayout.createSequentialGroup()
+                            .addComponent(insertConstantButton)
+                            .addGap(43, 43, 43))
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, directEditingPanelLayout.createSequentialGroup()
+                            .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(searchInConstantsText, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 173, Short.MAX_VALUE)
+                                .addComponent(tableConstantsNonfunctionalLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 173, Short.MAX_VALUE))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))))
                 .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(directEditingPanelLayout.createSequentialGroup()
-                        .addGap(77, 77, 77)
-                        .addComponent(tableVariablesNonfunctionalLabel))
+                        .addGap(124, 124, 124)
+                        .addComponent(insertVariableButton))
                     .addGroup(directEditingPanelLayout.createSequentialGroup()
                         .addGap(66, 66, 66)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(directEditingPanelLayout.createSequentialGroup()
-                        .addGap(124, 124, 124)
-                        .addComponent(insertVariableButton)))
+                        .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(searchInVariablesText)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE)
+                            .addComponent(tableVariablesNonfunctionalLabel))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(directEditingPanelLayout.createSequentialGroup()
                         .addGap(108, 108, 108)
                         .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(tableContentNonfunctionalLabel)
                             .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(59, 59, 59))
+                        .addGap(64, 64, 64))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, directEditingPanelLayout.createSequentialGroup()
                         .addGap(172, 172, 172)
                         .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(moveDownContentButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 94, Short.MAX_VALUE)
-                            .addComponent(deleteContentButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 94, Short.MAX_VALUE)
-                            .addComponent(moveUpContentButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 94, Short.MAX_VALUE))
-                        .addGap(103, 103, 103))))
+                            .addComponent(moveDownContentButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(deleteContentButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
+                            .addComponent(moveUpContentButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(DeleteAllContentButton)
+                        .addGap(20, 20, 20))))
         );
         directEditingPanelLayout.setVerticalGroup(
             directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, directEditingPanelLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(tableContentNonfunctionalLabel)
-                        .addComponent(tableConstantsNonfunctionalLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(tableContentNonfunctionalLabel)
+                    .addComponent(tableConstantsNonfunctionalLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(tableVariablesNonfunctionalLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, directEditingPanelLayout.createSequentialGroup()
                         .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(moveUpContentButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(moveDownContentButton)))
+                        .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(moveDownContentButton)
+                            .addComponent(DeleteAllContentButton)))
+                    .addGroup(directEditingPanelLayout.createSequentialGroup()
+                        .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(searchInConstantsText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(searchInVariablesText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, 0, 0, Short.MAX_VALUE)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 118, Short.MAX_VALUE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -410,6 +530,15 @@ public class SearchWindow extends javax.swing.JDialog {
             }
         });
 
+        verifyButton.setForeground(resourceMap.getColor("verifyButton.foreground")); // NOI18N
+        verifyButton.setText(resourceMap.getString("verifyButton.text")); // NOI18N
+        verifyButton.setName("verifyButton"); // NOI18N
+        verifyButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                verifyButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -430,16 +559,18 @@ public class SearchWindow extends javax.swing.JDialog {
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                         .addComponent(contentTickButton)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 424, Short.MAX_VALUE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 326, Short.MAX_VALUE)
+                                        .addComponent(verifyButton)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(syntaxButton)
                                         .addGap(18, 18, 18))
                                     .addComponent(nameTickButton)))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(searchContentNonfunctionalLabel)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(derulare_continut, javax.swing.GroupLayout.DEFAULT_SIZE, 714, Short.MAX_VALUE))
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 816, Short.MAX_VALUE)
-                            .addComponent(editTab, javax.swing.GroupLayout.DEFAULT_SIZE, 816, Short.MAX_VALUE)
+                                .addComponent(derulare_continut, javax.swing.GroupLayout.DEFAULT_SIZE, 719, Short.MAX_VALUE))
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 821, Short.MAX_VALUE)
+                            .addComponent(editTab)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(addButton)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -463,7 +594,8 @@ public class SearchWindow extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(correctnessLabel)
                     .addComponent(syntaxButton)
-                    .addComponent(contentTickButton))
+                    .addComponent(contentTickButton)
+                    .addComponent(verifyButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(searchNameNonfunctionalLabel)
@@ -533,25 +665,7 @@ public class SearchWindow extends javax.swing.JDialog {
      +"</P>"
      +"</HTML>";
       searchContentLabel.setText(s);
-      //we verify the rightness of the content of the variable
-      SyntacticItem syntacticTree=new SyntacticItem();
-      boolean correct=a.frame0.source1.verifySyntacticType
-                                            (
-                                            searchContent,
-                                            "wff",
-                                            0,
-                                            true,
-                                            syntacticTree
-                                            );
-
-      if (correct)
-      {
-         this.correctnessLabel.setText("Entered formula is:correct!");
-      }
-      else
-      {
-         this.correctnessLabel.setText("Entered formula is:incorrect!");
-      }
+      
       this.listOfConstants.clearSelection();
       
       }
@@ -617,24 +731,7 @@ public class SearchWindow extends javax.swing.JDialog {
      +"</P>"
      +"</HTML>";
       searchContentLabel.setText(s);
-      SyntacticItem syntacticTree=new SyntacticItem();
-      boolean correct=a.frame0.source1.verifySyntacticType
-                                            (
-                                            searchContent,
-                                            "wff",
-                                            0,
-                                            true,
-                                            syntacticTree
-                                            );
-
-      if (correct)
-      {
-         this.correctnessLabel.setText("Entered formula is:correct!");
-      }
-      else
-      {
-         this.correctnessLabel.setText("Entered formula is:incorrect!");
-      }
+      
       this.listOfVariables.clearSelection();
      }
     }//GEN-LAST:event_insertVariableButtonActionPerformed
@@ -680,28 +777,7 @@ public class SearchWindow extends javax.swing.JDialog {
      +"</P>"
      +"</HTML>";
       searchContentLabel.setText(s);
-      SyntacticItem syntacticTree=new SyntacticItem();
-      boolean correct=false;
-      if(!searchContent.isEmpty())
-      {
-        correct=a.frame0.source1.verifySyntacticType
-                                            (
-                                            searchContent,
-                                            "wff",
-                                            0,
-                                            true,
-                                            syntacticTree
-                                            );
-       }
-
-      if (correct)
-      {
-         this.correctnessLabel.setText("Entered formula is:correct!");
-      }
-      else
-      {
-         this.correctnessLabel.setText("Entered formula is:incorrect!");
-      }
+      
      listContent.clearSelection();
      }
     }//GEN-LAST:event_deleteContentButtonActionPerformed
@@ -774,25 +850,9 @@ public class SearchWindow extends javax.swing.JDialog {
      +"</P>"
      +"</HTML>";
       searchContentLabel.setText(s);
-      SyntacticItem syntacticTree=new SyntacticItem();
-      boolean correct=a.frame0.source1.verifySyntacticType
-                                            (
-                                            searchContent,
-                                            "wff",
-                                            0,
-                                            true,
-                                            syntacticTree
-                                            );
-
-      if (correct)
-      {
-         this.correctnessLabel.setText("Entered formula is:correct!");
-      }
-      else
-      {
-         this.correctnessLabel.setText("Entered formula is:incorrect!");
-      }
       listContent.clearSelection();
+      listContent.setSelectedIndex(selectedRowContent-1);
+      
       }
 
 
@@ -866,25 +926,9 @@ public class SearchWindow extends javax.swing.JDialog {
      +"</P>"
      +"</HTML>";
       searchContentLabel.setText(s);
-      SyntacticItem syntacticTree=new SyntacticItem();
-      boolean correct=a.frame0.source1.verifySyntacticType
-                                            (
-                                            searchContent,
-                                            "wff",
-                                            0,
-                                            true,
-                                            syntacticTree
-                                            );
-
-      if (correct)
-      {
-         this.correctnessLabel.setText("Entered formula is:correct!");
-      }
-      else
-      {
-         this.correctnessLabel.setText("Entered formula is:incorrect!");
-      }
+      
       listContent.clearSelection();
+      listContent.setSelectedIndex(selectedRowContent+1);
       }
 
     }//GEN-LAST:event_moveDownContentButtonActionPerformed
@@ -908,6 +952,8 @@ public class SearchWindow extends javax.swing.JDialog {
           {
         if(max2>0)
           {
+
+         //we search in axioms
         if(a.frame0.source1.axioms!=null)
         {
           Iterator<String> it=a.frame0.source1.axioms.keySet().iterator();
@@ -916,30 +962,56 @@ public class SearchWindow extends javax.swing.JDialog {
             String name=it.next();
             Axiom ax=(Axiom)a.frame0.source1.axioms.get(name);
             int max=ax.items.size();
+                      
             
-            //if the axiom is bigger or equal cu searched string
-            if(max>=max2)
+             //here we memories if a position in axiom/theorem/hypo is similar
+             //with a position in searchContent
+             boolean[] check = new boolean[max];
+             int similar=0;
+            
+            for(int i=0;i<max2;i++)
             {
-            boolean found=true;
-            for(int i=0;i<max-max2+1;i++)
-            {
-                   
-             found=true;
-             for(int j=0;j<max2;j++)
+             boolean oneAppearance=false;
+             for(int j=0;j<max;j++)
              {
-              String v_j=this.searchContent.get(j).constantOrVariableText;
-              String v_ipj=ax.items.get(i+j).constantOrVariableText;
-              if(!v_j.equals(v_ipj)) { found=false;}
+              String v_i=this.searchContent.get(i).constantOrVariableText;
+              byte  t_i=this.searchContent.get(i).constantOrVariable;
+              String v_j=ax.items.get(j).constantOrVariableText;
+              byte t_j=ax.items.get(j).constantOrVariable;
+              //if  v_i equal with v_j and position is unvisited
+              //and positions i and j all are constants
+              if((v_i.equals(v_j))&(check[j]==false)&(oneAppearance==false)&
+                                                              (t_i==1)&(t_j==1))
+              {
+               check[j]=true;
+               oneAppearance=true;
+               similar++;
+               
+              }
 
              }
-             if (found) {break;}
+             
              }
-            if (found)
+            if (similar>=1)
             {
               AppliedItem item= new AppliedItem();
               item.name=ax.name;
+              int sum=0;
               if(ax.type==1) {item.type=DemonstrationConstants.SIMPLE_AXIOM;}
-                  else if(ax.type==2) {item.type=DemonstrationConstants.AXIOM_FROM_COMPOSED_AXIOM;}
+                  else if(ax.type==2)
+                       {
+                         item.type=DemonstrationConstants.
+                                                  AXIOM_FROM_COMPOSED_AXIOM;
+                           int number=ax.hypotheses.size();
+                           
+                           for(int i=0;i<number;i++)
+                           {
+                            sum=sum+ax.hypotheses.get(i).items.size();
+                           }
+                       }
+              item.priority=(float)
+              ( (float)((float) similar /(float) max )*(float)10000-
+                       (float)(((float)sum/(float)max)*(float)100) );
               if(a!=null)
               {
                if(a.frame0!=null)
@@ -952,10 +1024,10 @@ public class SearchWindow extends javax.swing.JDialog {
               }
             }
 
-             }
+             
            }
         }
-
+        //we  search in theorems
         if(a.frame0.source1.theorems!=null)
         {
           Iterator<String> it=a.frame0.source1.theorems.keySet().iterator();
@@ -966,28 +1038,54 @@ public class SearchWindow extends javax.swing.JDialog {
             int max=tx.items.size();
 
 
-            //if the theorem is bigger or equal with searched string
-            if(max>=max2)
+             //here we memories if a position in axiom/theorem/hypo is similar
+             //with a position in searchContent
+             boolean[] check = new boolean[max];
+             int similar=0;
+
+            for(int i=0;i<max2;i++)
             {
-            boolean found=true;
-            for(int i=0;i<max-max2+1;i++)
-            {
-             found=true;
-             for(int j=0;j<max2;j++)
+              boolean oneAppearance=false;
+             for(int j=0;j<max;j++)
              {
-              String v_j=this.searchContent.get(j).constantOrVariableText;
-              String v_ipj=tx.items.get(i+j).constantOrVariableText;
-              if(!v_j.equals(v_ipj)) { found=false;}
+              String v_i=this.searchContent.get(i).constantOrVariableText;
+              byte  t_i=this.searchContent.get(i).constantOrVariable;
+              String v_j=tx.items.get(j).constantOrVariableText;
+              byte t_j=tx.items.get(j).constantOrVariable;
+              //if  v_i equal with v_j and position is unvisited
+              //and positions i and j all are constants
+              if((v_i.equals(v_j))&(check[j]==false)&(oneAppearance==false)
+                      &(t_i==1)&(t_j==1))
+              {
+               check[j]=true;
+               oneAppearance=true;
+               similar++;
+
+              }
 
              }
-             if (found) {break;}
+
              }
-            if (found)
+            if (similar>=1)
             {
               AppliedItem item= new AppliedItem();
               item.name=tx.name;
+              int sum=0;
               if(tx.type==1) {item.type=DemonstrationConstants.SIMPLE_THEOREM;}
-                  else if(tx.type==2) {item.type=DemonstrationConstants.THEOREM_FROM_COMPOSED_THEOREM;}
+                  else if(tx.type==2)
+                  {
+                      item.type=DemonstrationConstants.
+                                                 THEOREM_FROM_COMPOSED_THEOREM;
+                       int number=tx.hypotheses.size();
+                           
+                       for(int i=0;i<number;i++)
+                       {
+                        sum=sum+tx.hypotheses.get(i).items.size();
+                       }
+                  }
+              item.priority=(float)
+              ( (float)((float) similar /(float) max )*(float)10000-
+                  (float)(((float)sum/(float)max)*(float)100));
               if(a!=null)
               {
                if(a.frame0!=null)
@@ -1000,9 +1098,55 @@ public class SearchWindow extends javax.swing.JDialog {
               }
             }
 
-             }
+
            }
         }
+
+
+        
+        //here we sort descending the List of found items by priority
+          if(a!=null)
+           {
+          if(a.frame0!=null)
+           {
+          if(a.frame0.listOfFoundItems!=null)
+           {
+          boolean ok=true;
+          int max0=a.frame0.listOfFoundItems.size();
+          do
+          {
+           ok=true;
+           for(int i=0;i<max0-1;i++)
+           {
+            float priorityI=a.frame0.listOfFoundItems.get(i).priority;
+            float priorityIp1=a.frame0.listOfFoundItems.get(i+1).priority;
+            if (priorityI<priorityIp1)
+            {
+             ok=false;
+             String auxname=a.frame0.listOfFoundItems.get(i).name;
+             float auxpriority=a.frame0.listOfFoundItems.get(i).priority;
+             int auxtype=a.frame0.listOfFoundItems.get(i).type;
+
+             a.frame0.listOfFoundItems.get(i).name=
+                                          a.frame0.listOfFoundItems.get(i+1).name;
+             a.frame0.listOfFoundItems.get(i).priority=
+                                      a.frame0.listOfFoundItems.get(i+1).priority;
+             a.frame0.listOfFoundItems.get(i).type=
+                                          a.frame0.listOfFoundItems.get(i+1).type;
+
+             a.frame0.listOfFoundItems.get(i+1).name=auxname;
+             a.frame0.listOfFoundItems.get(i+1).priority=auxpriority;
+             a.frame0.listOfFoundItems.get(i+1).type=auxtype;
+            }
+
+           }
+
+          }
+          while(!ok);
+          }
+          }
+          }
+
         }
         }
        else if(searchOption==2)
@@ -1080,6 +1224,7 @@ public class SearchWindow extends javax.swing.JDialog {
      listOfFound.getColumnModel().getColumn(1).setPreferredWidth(100);
      listOfFound.getColumnModel().getColumn(2).setPreferredWidth(100);
      listOfFound.getColumnModel().getColumn(3).setPreferredWidth(500);
+     listOfFound.getColumnModel().getColumn(4).setPreferredWidth(100);
      this.listOfFound.revalidate();
      this.listOfFound.repaint();
     
@@ -1255,6 +1400,114 @@ public class SearchWindow extends javax.swing.JDialog {
            }
     }//GEN-LAST:event_goButtonActionPerformed
 
+    private void DeleteAllContentButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DeleteAllContentButtonActionPerformed
+        
+        if(this.searchContent!=null)
+        {
+         if(!this.searchContent.isEmpty())
+        {
+          this.searchContent.clear();
+          listContent.updateUI();
+          searchContentLabel.setText("");
+          this.correctnessLabel.setText("_____");
+        }
+        }
+    }//GEN-LAST:event_DeleteAllContentButtonActionPerformed
+
+    private void searchInConstantsTextKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchInConstantsTextKeyTyped
+
+         Application0 a=(Application0)Application.getInstance();
+
+          listConstants.clear();
+
+          if (a.frame0!=null)
+          {
+          if (a.frame0.source1!=null)
+             {
+           if (a.frame0.source1.constants!=null)
+             {
+
+                Iterator<String> it=a.frame0.source1.constants.iterator();
+               while(it.hasNext())
+               {
+                String s1=it.next();
+                if(s1.indexOf(this.searchInConstantsText.getText())>-1)
+                {
+                listConstants.add(s1);
+                }
+
+
+                }
+              }
+             }
+            }
+         listOfConstants.setModel(new ListModelConstants());
+         listOfConstants.revalidate();
+         listOfConstants.repaint();
+    }//GEN-LAST:event_searchInConstantsTextKeyTyped
+
+    private void searchInVariablesTextKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchInVariablesTextKeyTyped
+
+     Application0 a=(Application0)Application.getInstance();
+
+          listVariables.clear();
+
+          if (a.frame0!=null)
+          {
+          if (a.frame0.source1!=null)
+             {
+           if (a.frame0.source1.variables!=null)
+             {
+
+                Iterator<String> it=a.frame0.source1.variables.iterator();
+               while(it.hasNext())
+               {
+                String s1=it.next();
+                if(s1.indexOf(this.searchInVariablesText.getText())>-1)
+                {
+                listVariables.add(s1);
+                }
+
+
+                }
+              }
+             }
+            }
+         listOfVariables.setModel(new ModelListVariables());
+         listOfVariables.revalidate();
+         listOfVariables.repaint();
+    }//GEN-LAST:event_searchInVariablesTextKeyTyped
+
+    private void verifyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_verifyButtonActionPerformed
+
+      if (searchContent!=null)
+      {
+      if (!searchContent.isEmpty())
+      {
+        //we verify the rightness of the content of the variable
+      Application0 a=(Application0)Application.getInstance();
+      SyntacticItem syntacticTree=new SyntacticItem();
+      boolean correct=a.frame0.source1.verifySyntacticType
+                                            (
+                                            searchContent,
+                                            "wff",
+                                            0,
+                                            true,
+                                            syntacticTree
+                                            );
+
+      if (correct)
+      {
+         this.correctnessLabel.setText("Entered formula is:correct!");
+      }
+      else
+      {
+         this.correctnessLabel.setText("Entered formula is:incorrect!");
+      }
+     }
+     }
+    }//GEN-LAST:event_verifyButtonActionPerformed
+
     /**
     * @param args the command line arguments
     */
@@ -1273,6 +1526,7 @@ public class SearchWindow extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton DeleteAllContentButton;
     private javax.swing.JButton addButton;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.ButtonGroup buttonGroup2;
@@ -1306,11 +1560,14 @@ public class SearchWindow extends javax.swing.JDialog {
     private javax.swing.JButton searchButton;
     private javax.swing.JLabel searchContentLabel;
     private javax.swing.JLabel searchContentNonfunctionalLabel;
+    private javax.swing.JTextField searchInConstantsText;
+    private javax.swing.JTextField searchInVariablesText;
     private javax.swing.JLabel searchNameNonfunctionalLabel;
     private javax.swing.JButton syntaxButton;
     private javax.swing.JLabel tableConstantsNonfunctionalLabel;
     private javax.swing.JLabel tableContentNonfunctionalLabel;
     private javax.swing.JLabel tableVariablesNonfunctionalLabel;
+    private javax.swing.JButton verifyButton;
     // End of variables declaration//GEN-END:variables
     
     //here are memorized the name and the content of the variable
@@ -1332,29 +1589,8 @@ public class SearchWindow extends javax.swing.JDialog {
           
       public ListModelConstants()
       {
-          //here we reset the table
-          Application0 a=(Application0)Application.getInstance();
-          listConstants.clear();
-          
-          if (a.frame0!=null)
-          {
-          if (a.frame0.source1!=null)
-             {
-           if (a.frame0.source1.constants!=null)
-             {
-             
-                Iterator<String> it=a.frame0.source1.constants.iterator();
-               while(it.hasNext())
-               {
-                String s1=it.next();
-                listConstants.add(s1);
-                 
-               
-                }
-              }
-             }
-            }
-        }
+         
+      }
        
       public String getElementAt(int line)
       {
@@ -1366,7 +1602,7 @@ public class SearchWindow extends javax.swing.JDialog {
                String s2="",s1=listConstants.get(line);
                 s2=a.frame0.source1.htlmldefString1AsString2.get(s1);
                 if (s2==null) s2=s1;
-                s2="("+line+")"+s2;
+                s2="("+line+"|"+s1+")"+s2;
                 s2=s2.replaceAll("ALIGN=TOP","ALIGN=CENTER");
                 s2="<HTML>"
                  +"<base href='file:"+a.path+"/symbols/  '/>"
@@ -1441,28 +1677,8 @@ public class SearchWindow extends javax.swing.JDialog {
 
       public ModelListVariables()
       {
-          //here we reset the table
-          
-          Application0 a=(Application0)Application.getInstance();
-           listVariables.clear();
-          if (a.frame0!=null)
-          {
-          if (a.frame0.source1!=null)
-             {
-           if (a.frame0.source1.variables!=null)
-           {
-                Iterator<String> it=a.frame0.source1.variables.iterator();
-
-               while(it.hasNext())
-               {
-                String s1=it.next();
-                listVariables.add(s1);
-                                 
-                }
-              }
-             }
-            }
-        }
+         
+      }
 
       public String getElementAt(int line)
       {
@@ -1474,7 +1690,7 @@ public class SearchWindow extends javax.swing.JDialog {
                s2=a.frame0.source1.htlmldefString1AsString2.get(s1);
                 if (s2==null) s2=s1;
                 String s3=a.frame0.source1.variableAndType.get(s1);
-                s2="("+line+")"+s2+"["+s3+"]";
+                s2="("+line+"|"+s1+")"+s2+"["+s3+"]";
                 s2=s2.replaceAll("ALIGN=TOP","ALIGN=CENTER");
                 s2="<HTML>"
                  +"<base href='file:"+a.path+"/symbols/  '/>"
@@ -1610,6 +1826,7 @@ void pressedRowListContent(ListSelectionEvent e)
                 }
             }
        }
+           
     
    }
 
@@ -1629,7 +1846,7 @@ void pressedRowListContent(ListSelectionEvent e)
    public class ModelListFound extends AbstractTableModel
   {
       List<List<String>> table=null;
-      String[] namesColumns={"No.","Type","Name","Content"};
+      String[] namesColumns={"No.","Type","Name","Content","Priority"};
 
 
       public ModelListFound()
@@ -1660,6 +1877,7 @@ void pressedRowListContent(ListSelectionEvent e)
                 String name=item.name;
                 String displayedType="";
                 String content="";
+                String priority=""+item.priority;
 
                 if (type==DemonstrationConstants.AXIOM_FROM_COMPOSED_AXIOM)
                 {
@@ -1814,6 +2032,7 @@ void pressedRowListContent(ListSelectionEvent e)
                 +"</P>"
                 +"</HTML>";
                 line.add(content);
+                line.add(priority);
                 //we add i line to the table(list)
                 table.add(line);
                }
@@ -1843,7 +2062,7 @@ void pressedRowListContent(ListSelectionEvent e)
 
       public int getColumnCount()
       {
-          return 4;
+          return 5;
       }
 
       public int  getRowCount()

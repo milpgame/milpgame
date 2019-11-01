@@ -90,6 +90,7 @@ public class PropertiesWindow extends javax.swing.JDialog {
         setName("Form"); // NOI18N
         setResizable(false);
 
+        scrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         scrollPane.setAutoscrolls(true);
         scrollPane.setName("scrollPane"); // NOI18N
 
@@ -172,6 +173,8 @@ public  javax.swing.JPanel  createBase()
     maximumBaseHeight=0;
     //END initialize variables
     javax.swing.JPanel basePanel=new javax.swing.JPanel();
+     basePanel.setAutoscrolls(true);
+     
      basePanel.setLayout(null);
      Dimension dimension=new Dimension();
      dimension.width=referenceWidth+xRightSpace;

@@ -467,7 +467,7 @@ public class ListOfRulesWindow extends javax.swing.JDialog {
   public class ListModel0 extends AbstractTableModel
   {
       List<List<String>> table=null;
-      String[] namesColumns={"No.","Type","Name","Content"};
+      String[] namesColumns={"No.","Type","Name","Content","Priority"};
 
       
       public ListModel0()
@@ -498,6 +498,7 @@ public class ListOfRulesWindow extends javax.swing.JDialog {
                 String name=item.name;
                 String displayedType="";
                 String content="";
+                String priority0=String.valueOf(item.priority);
 
                 if (type==DemonstrationConstants.AXIOM_FROM_COMPOSED_AXIOM)
                 {
@@ -652,6 +653,7 @@ public class ListOfRulesWindow extends javax.swing.JDialog {
                 +"</P>"
                 +"</HTML>";
                 line.add(content);
+                line.add(priority0);
                 //we add i line to the table(list)
                 table.add(line);
                }
@@ -681,7 +683,7 @@ public class ListOfRulesWindow extends javax.swing.JDialog {
 
       public int getColumnCount()
       {
-          return 4;
+          return 5;
       }
 
       public int  getRowCount()

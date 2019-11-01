@@ -5,6 +5,7 @@
 //********************************************************************/
 
 package spv;
+import java.awt.Color;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.JFrame;
 import javax.swing.AbstractListModel;
@@ -13,10 +14,15 @@ import javax.swing.DefaultListSelectionModel;
 
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.text.StyledDocument;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.BadLocationException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.HashSet;
+import java.util.StringTokenizer;
 import org.jdesktop.application.Application;
 import spv.gen.DemonstrationConstants;
 import spv.gen.Hypothesis;
@@ -35,10 +41,69 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
             ) {
         super(parent, modal);
         initComponents();
-
+          /*
+          StyledDocument doc=this.textPane.getStyledDocument();
+           Style style=this.textPane.addStyle("red style", null);
+           StyleConstants.setForeground(style, Color.red);
+           try
+           {
+            doc.insertString(doc.getLength(), "This", null);
+            doc.insertString(doc.getLength(), "Apple", style);
+            doc.insertString(doc.getLength(), "is a good", null);
+            doc.insertString(doc.getLength(), "Apple", style);
+           } catch(BadLocationException e){}
+          */
          Application0 a=(Application0)Application.getInstance();
+        //we initializes the constants
+          listConstants0.clear();
+
+          if (a.frame0!=null)
+          {
+          if (a.frame0.source1!=null)
+             {
+           if (a.frame0.source1.constants!=null)
+             {
+
+                Iterator<String> it=a.frame0.source1.constants.iterator();
+               while(it.hasNext())
+               {
+                String s1=it.next();
+                listConstants0.add(s1);
 
 
+                }
+              }
+             }
+            }
+         listConstants.setModel(new ModelListConstants());
+         listConstants.revalidate();
+         listConstants.repaint();
+         //end constants
+
+         //initializes the variables
+          listVariables0.clear();
+
+          if (a.frame0!=null)
+          {
+          if (a.frame0.source1!=null)
+             {
+           if (a.frame0.source1.variables!=null)
+             {
+
+                Iterator<String> it=a.frame0.source1.variables.iterator();
+               while(it.hasNext())
+               {
+                String s1=it.next();
+                listVariables0.add(s1);
+                }
+              }
+             }
+            }
+         listVariables.setModel(new ModelListVariables());
+         listVariables.revalidate();
+         listVariables.repaint();
+         //end variables
+         
          if (a!=null)
          {
           if (a.frame0!=null)
@@ -108,12 +173,16 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
         insertConstantButton = new javax.swing.JButton();
         moveDownContentButton = new javax.swing.JButton();
         moveUpContentButton = new javax.swing.JButton();
+        searchInConstantsText = new javax.swing.JTextField();
+        searchInVariablesText = new javax.swing.JTextField();
         correctnessLabel = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        textArea = new javax.swing.JTextArea();
         scrollContentText = new javax.swing.JScrollPane();
         variableContentLabel = new javax.swing.JLabel();
         syntaxButton = new javax.swing.JButton();
+        verifyButton = new javax.swing.JButton();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        textPane = new javax.swing.JTextPane();
+        importButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Edit content of a formula"); // NOI18N
@@ -210,6 +279,24 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
             }
         });
 
+        searchInConstantsText.setForeground(resourceMap.getColor("searchInConstantsText.foreground")); // NOI18N
+        searchInConstantsText.setText(resourceMap.getString("searchInConstantsText.text")); // NOI18N
+        searchInConstantsText.setName("searchInConstantsText"); // NOI18N
+        searchInConstantsText.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                searchInConstantsTextKeyTyped(evt);
+            }
+        });
+
+        searchInVariablesText.setForeground(resourceMap.getColor("searchInVariablesText.foreground")); // NOI18N
+        searchInVariablesText.setText(resourceMap.getString("searchInVariablesText.text")); // NOI18N
+        searchInVariablesText.setName("searchInVariablesText"); // NOI18N
+        searchInVariablesText.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                searchInVariablesTextKeyTyped(evt);
+            }
+        });
+
         javax.swing.GroupLayout directEditingPanelLayout = new javax.swing.GroupLayout(directEditingPanel);
         directEditingPanel.setLayout(directEditingPanelLayout);
         directEditingPanelLayout.setHorizontalGroup(
@@ -218,24 +305,29 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
                 .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(directEditingPanelLayout.createSequentialGroup()
                         .addContainerGap()
-                        .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(constantsTableNonfunctionalLabel)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(searchInConstantsText, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE))
                     .addGroup(directEditingPanelLayout.createSequentialGroup()
                         .addGap(44, 44, 44)
-                        .addComponent(insertConstantButton)))
+                        .addComponent(insertConstantButton))
+                    .addGroup(directEditingPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(constantsTableNonfunctionalLabel))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, directEditingPanelLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(insertVariableButton, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(63, 63, 63))
                     .addGroup(directEditingPanelLayout.createSequentialGroup()
                         .addGap(46, 46, 46)
                         .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(variablesTableNonfunctionalLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE)
                             .addGroup(directEditingPanelLayout.createSequentialGroup()
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(25, 25, 25))
-                            .addComponent(variablesTableNonfunctionalLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE))))
+                                .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(searchInVariablesText, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE))
+                                .addGap(25, 25, 25)))))
                 .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(directEditingPanelLayout.createSequentialGroup()
                         .addGap(104, 104, 104)
@@ -269,28 +361,27 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
                         .addComponent(moveDownContentButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(deleteContentButton))
-                    .addGroup(directEditingPanelLayout.createSequentialGroup()
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 261, Short.MAX_VALUE)
-                        .addGap(26, 26, 26))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, directEditingPanelLayout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 258, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(insertVariableButton)
-                            .addComponent(insertConstantButton))))
+                            .addComponent(searchInConstantsText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(searchInVariablesText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, directEditingPanelLayout.createSequentialGroup()
+                                .addComponent(jScrollPane2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(directEditingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(insertVariableButton)
+                                    .addComponent(insertConstantButton)))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, directEditingPanelLayout.createSequentialGroup()
+                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(26, 26, 26)))))
                 .addGap(123, 123, 123))
         );
 
         editingTab.addTab("Edit content directly", directEditingPanel);
 
         correctnessLabel.setName("correctnessLabel"); // NOI18N
-
-        jScrollPane1.setName("jScrollPane1"); // NOI18N
-
-        textArea.setColumns(20);
-        textArea.setRows(5);
-        textArea.setName("textArea"); // NOI18N
-        jScrollPane1.setViewportView(textArea);
 
         scrollContentText.setName("scrollContentText"); // NOI18N
 
@@ -308,24 +399,57 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
             }
         });
 
+        verifyButton.setForeground(resourceMap.getColor("verifyButton.foreground")); // NOI18N
+        verifyButton.setText(resourceMap.getString("verifyButton.text")); // NOI18N
+        verifyButton.setName("verifyButton"); // NOI18N
+        verifyButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                verifyButtonActionPerformed(evt);
+            }
+        });
+
+        jScrollPane5.setName("jScrollPane5"); // NOI18N
+
+        textPane.setName("textPane"); // NOI18N
+        jScrollPane5.setViewportView(textPane);
+
+        importButton.setForeground(resourceMap.getColor("importButton.foreground")); // NOI18N
+        importButton.setText(resourceMap.getString("importButton.text")); // NOI18N
+        importButton.setName("importButton"); // NOI18N
+        importButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 659, Short.MAX_VALUE)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                            .addComponent(correctnessLabel)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(syntaxButton))
-                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                            .addComponent(formulaContentNonfunctionalLabel)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addComponent(scrollContentText, javax.swing.GroupLayout.DEFAULT_SIZE, 567, Short.MAX_VALUE)))
-                    .addComponent(editingTab, javax.swing.GroupLayout.DEFAULT_SIZE, 659, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 659, Short.MAX_VALUE)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(correctnessLabel)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(verifyButton)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                                    .addComponent(syntaxButton))
+                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                    .addComponent(formulaContentNonfunctionalLabel)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(scrollContentText, javax.swing.GroupLayout.DEFAULT_SIZE, 567, Short.MAX_VALUE)))
+                            .addComponent(editingTab, javax.swing.GroupLayout.DEFAULT_SIZE, 659, Short.MAX_VALUE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(217, 217, 217)
+                        .addComponent(importButton, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -341,12 +465,16 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(correctnessLabel)
-                    .addComponent(syntaxButton))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(syntaxButton)
+                        .addComponent(verifyButton)))
                 .addGap(18, 18, 18)
                 .addComponent(editingTab, javax.swing.GroupLayout.PREFERRED_SIZE, 363, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(importButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         editingTab.getAccessibleContext().setAccessibleName("Insert tokens"); // NOI18N
@@ -401,26 +529,10 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
      +"</P>"
      +"</HTML>";
       variableContentLabel.setText(s);
-      this.textArea.setText(x);
+      this.textPane.setText(x);
       //we verify the correctness of the content of the formula
-      SyntacticItem syntacticTree=new SyntacticItem();
-      boolean correct=a.frame0.source1.verifySyntacticType
-                                            (
-                                            formulaContent,
-                                            "wff",
-                                            0,
-                                            true,
-                                            syntacticTree
-                                            );
-
-      if (correct)
-      {
-         this.correctnessLabel.setText("Entered formula is:correct!");
-      }
-      else
-      {
-         this.correctnessLabel.setText("Entered formula is:incorrect!");
-      }
+      
+      
       this.listConstants.clearSelection();
      
      }
@@ -487,25 +599,9 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
      +"</P>"
      +"</HTML>";
       variableContentLabel.setText(s);
-      textArea.setText(x);
-      SyntacticItem syntacticTree=new SyntacticItem();
-      boolean correct=a.frame0.source1.verifySyntacticType
-                                            (
-                                            formulaContent,
-                                            "wff",
-                                            0,
-                                            true,
-                                            syntacticTree
-                                            );
-
-      if (correct)
-      {
-         this.correctnessLabel.setText("Entered formula is:correct!");
-      }
-      else
-      {
-         this.correctnessLabel.setText("Entered formula is:incorrect!");
-      }
+      textPane.setText(x);
+      
+      
       this.listVariables.clearSelection();
      }
     }//GEN-LAST:event_insertVariableButtonActionPerformed
@@ -552,30 +648,10 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
      +"</P>"
      +"</HTML>";
       variableContentLabel.setText(s);
-      textArea.setText(x);
-      SyntacticItem syntacticTree=new SyntacticItem();
-      boolean correct=false;
-      if(!formulaContent.isEmpty())
-      {
-        correct=a.frame0.source1.verifySyntacticType
-                                            (
-                                            formulaContent,
-                                            "wff",
-                                            0,
-                                            true,
-                                            syntacticTree
-                                            );
-       }
-
-      if (correct)
-      {
-         this.correctnessLabel.setText("Entered formula is:correct!");
-      }
-      else
-      {
-         this.correctnessLabel.setText("Entered formula is:incorrect!");
-      }
+      textPane.setText(x);
+      
      listContent.clearSelection();
+
      }
     }//GEN-LAST:event_deleteContentButtonActionPerformed
 
@@ -648,26 +724,10 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
      +"</P>"
      +"</HTML>";
       variableContentLabel.setText(s);
-      textArea.setText(x);
-      SyntacticItem syntacticTree=new SyntacticItem();
-      boolean correct=a.frame0.source1.verifySyntacticType
-                                            (
-                                            formulaContent,
-                                            "wff",
-                                            0,
-                                            true,
-                                            syntacticTree
-                                            );
-
-      if (correct)
-      {
-         this.correctnessLabel.setText("Entered formula is:correct!");
-      }
-      else
-      {
-         this.correctnessLabel.setText("Entered formula is:incorrect!");
-      }
+      textPane.setText(x);
+     
       listContent.clearSelection();
+      listContent.setSelectedIndex(selectedRowContent-1);
       }
 
 
@@ -742,8 +802,95 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
      +"</P>"
      +"</HTML>";
       variableContentLabel.setText(s);
-      textArea.setText(x);
-      SyntacticItem syntacticTree=new SyntacticItem();
+      textPane.setText(x);
+      
+      listContent.clearSelection();
+      listContent.setSelectedIndex(selectedRowContent+1);
+      }
+
+    }//GEN-LAST:event_moveDownContentButtonActionPerformed
+
+    private void syntaxButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_syntaxButtonActionPerformed
+        JFrame mainFrame = Application0.getApplication().getMainFrame();
+        this.syntaxWindow = new SyntaxWindow(mainFrame,true);
+        this.syntaxWindow.setLocationRelativeTo(mainFrame);
+
+        Application0.getApplication().show(syntaxWindow);
+    }//GEN-LAST:event_syntaxButtonActionPerformed
+
+    private void searchInConstantsTextKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchInConstantsTextKeyTyped
+
+       Application0 a=(Application0)Application.getInstance();
+
+          listConstants0.clear();
+
+          if (a.frame0!=null)
+          {
+          if (a.frame0.source1!=null)
+             {
+           if (a.frame0.source1.constants!=null)
+             {
+
+                Iterator<String> it=a.frame0.source1.constants.iterator();
+               while(it.hasNext())
+               {
+                String s1=it.next();
+                if(s1.indexOf(this.searchInConstantsText.getText())>-1)
+                {
+                listConstants0.add(s1);
+                }
+
+
+                }
+              }
+             }
+            }
+         listConstants.setModel(new ModelListConstants());
+         listConstants.revalidate();
+         listConstants.repaint();
+    }//GEN-LAST:event_searchInConstantsTextKeyTyped
+
+    private void searchInVariablesTextKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchInVariablesTextKeyTyped
+
+     Application0 a=(Application0)Application.getInstance();
+
+          listVariables0.clear();
+
+          if (a.frame0!=null)
+          {
+          if (a.frame0.source1!=null)
+             {
+           if (a.frame0.source1.variables!=null)
+             {
+
+                Iterator<String> it=a.frame0.source1.variables.iterator();
+               while(it.hasNext())
+               {
+                String s1=it.next();
+                if(s1.indexOf(this.searchInVariablesText.getText())>-1)
+                {
+                listVariables0.add(s1);
+                }
+
+
+                }
+              }
+             }
+            }
+         listVariables.setModel(new ModelListVariables());
+         listVariables.revalidate();
+         listVariables.repaint();
+
+    }//GEN-LAST:event_searchInVariablesTextKeyTyped
+
+    private void verifyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_verifyButtonActionPerformed
+       Application0 a=(Application0)Application.getInstance();
+     if (formulaContent!=null)
+     {
+     if (!formulaContent.isEmpty())
+     {
+
+       SyntacticItem syntacticTree=new SyntacticItem();
       boolean correct=a.frame0.source1.verifySyntacticType
                                             (
                                             formulaContent,
@@ -761,18 +908,173 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
       {
          this.correctnessLabel.setText("Entered formula is:incorrect!");
       }
-      listContent.clearSelection();
+
+      }
+      }
+       
+    }//GEN-LAST:event_verifyButtonActionPerformed
+
+    private void importButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importButtonActionPerformed
+
+     Application0 a=(Application0)Application.getInstance();
+     StyledDocument doc=this.textPane.getStyledDocument();
+     Style style=this.textPane.addStyle("red style", null);
+     StyleConstants.setForeground(style, Color.red);
+     
+     String inputText=this.textPane.getText();
+     StringTokenizer st=new StringTokenizer(inputText," ");
+     this.textPane.setText("");//we clear the text
+
+     List<ConstantAndVariable>  importedFormula = new
+                                              ArrayList<ConstantAndVariable>();
+     boolean correctWords=true;
+     
+     while(st.hasMoreTokens())
+     {
+      String si=st.nextToken();
+     
+      boolean stringFound=false;
+
+               Iterator<String> it1=a.frame0.source1.constants.iterator();
+               while(it1.hasNext())
+               {
+                String constI=it1.next();
+                if(constI.equals(si))
+                {
+                 ConstantAndVariable c=new ConstantAndVariable();
+                 c.constantOrVariable=1;
+                 c.constantOrVariableText=si;
+                 importedFormula.add(c);
+                 stringFound=true;
+                 break;
+                }
+                }
+
+               Iterator<String> it2=a.frame0.source1.variables.iterator();
+               while(it2.hasNext())
+               {
+                String varI=it2.next();
+                if(varI.equals(si))
+                {
+                 ConstantAndVariable v=new ConstantAndVariable();
+                 v.constantOrVariable=2;
+                 v.constantOrVariableText=si;
+                 if (a.frame0!=null)
+                  {
+                  if (a.frame0.source1!=null)
+                     {
+                   if (a.frame0.source1.variableAndType!=null)
+                   {
+
+                     v.variableClass=a.frame0.source1.variableAndType.
+                                                  get(v.constantOrVariableText);
+                   }
+                   }
+                   }
+                 importedFormula.add(v);
+                 stringFound=true;
+                 break;
+                }
+                }
+
+     if(!stringFound)
+     {
+         try
+           {
+            doc.insertString(doc.getLength(), si, style);
+            doc.insertString(doc.getLength(), " ", null);
+
+           } catch(BadLocationException e){}
+
+         correctWords=false;
+     }
+     else
+     {
+
+        try
+           {
+            doc.insertString(doc.getLength(), si, null);
+            doc.insertString(doc.getLength(), " ", null);
+
+           } catch(BadLocationException e){}
+     }
+
+
+     }
+     if(correctWords)
+     {
+       //redisplay formulaContent
+       formulaContent=importedFormula;
+
+       listContent.updateUI();
+
+        String s="";
+       int max=formulaContent.size();
+
+       for (int i=0;i<max;i++)
+       {
+        String  s2="",s1=formulaContent.get(i).constantOrVariableText;
+        if(a!=null)
+        {
+         if (a.frame0!=null)
+         {
+           if (a.frame0.source1!=null)
+           {
+           if (a.frame0.source1.htlmldefString1AsString2!=null)
+           {
+             s2=a.frame0.source1.htlmldefString1AsString2.get(s1);
+           }
+           }
+         }
+        }
+        if (s2==null) s2=s1;
+       
+        s=s+s2;
+       }
+
+      s =s.replaceAll("ALIGN=TOP","ALIGN=CENTER");
+     s="<HTML>"
+     +"<base href='file:"+a.path+"/symbols/  '/>"
+     +"<P CLASS='western' STYLE='margin-bottom: 0cm; background: #04ff81'>"
+     +"<FONT COLOR='#ffffff' SIZE=3 >"
+     +s
+     +"</FONT>"
+     +"</P>"
+     +"</HTML>";
+      variableContentLabel.setText(s);
+     //we verify syntactic correctness
+
+      if (formulaContent!=null)
+     {
+     if (!formulaContent.isEmpty())
+     {
+
+       SyntacticItem syntacticTree=new SyntacticItem();
+      boolean correct=a.frame0.source1.verifySyntacticType
+                                            (
+                                            formulaContent,
+                                            "wff",
+                                            0,
+                                            true,
+                                            syntacticTree
+                                            );
+
+      if (correct)
+      {
+         this.correctnessLabel.setText("Entered formula is:correct!");
+      }
+      else
+      {
+         this.correctnessLabel.setText("Entered formula is:incorrect!");
       }
 
-    }//GEN-LAST:event_moveDownContentButtonActionPerformed
+      }
+      }
+     }
 
-    private void syntaxButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_syntaxButtonActionPerformed
-        JFrame mainFrame = Application0.getApplication().getMainFrame();
-        this.syntaxWindow = new SyntaxWindow(mainFrame,true);
-        this.syntaxWindow.setLocationRelativeTo(mainFrame);
 
-        Application0.getApplication().show(syntaxWindow);
-    }//GEN-LAST:event_syntaxButtonActionPerformed
+
+    }//GEN-LAST:event_importButtonActionPerformed
 
     
     public static void main(String args[]) {
@@ -797,22 +1099,26 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
     private javax.swing.JPanel directEditingPanel;
     private javax.swing.JTabbedPane editingTab;
     private javax.swing.JLabel formulaContentNonfunctionalLabel;
+    private javax.swing.JButton importButton;
     private javax.swing.JButton insertConstantButton;
     private javax.swing.JButton insertVariableButton;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JList listConstants;
     private javax.swing.JList listContent;
     private javax.swing.JList listVariables;
     private javax.swing.JButton moveDownContentButton;
     private javax.swing.JButton moveUpContentButton;
     private javax.swing.JScrollPane scrollContentText;
+    private javax.swing.JTextField searchInConstantsText;
+    private javax.swing.JTextField searchInVariablesText;
     private javax.swing.JButton syntaxButton;
-    public javax.swing.JTextArea textArea;
+    public javax.swing.JTextPane textPane;
     private javax.swing.JLabel variableContentLabel;
     private javax.swing.JLabel variablesTableNonfunctionalLabel;
+    private javax.swing.JButton verifyButton;
     // End of variables declaration//GEN-END:variables
     
     //here are stored the name and the content of the variable
@@ -834,29 +1140,8 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
      
       public ModelListConstants()
       {
-          //here we reset the table
-          
-          Application0 a=(Application0)Application.getInstance();
-          
-          if (a.frame0!=null)
-          {
-          if (a.frame0.source1!=null)
-             {
-           if (a.frame0.source1.constants!=null)
-             {
-             
-                Iterator<String> it=a.frame0.source1.constants.iterator();
-               while(it.hasNext())
-               {
-                String s1=it.next();
-                listConstants0.add(s1);
-                 
-                
-                }
-              }
-             }
-            }
-        }
+         
+      }
        
       public String getElementAt(int line)
       {
@@ -868,7 +1153,7 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
                String s2="",s1=listConstants0.get(line);
                 s2=a.frame0.source1.htlmldefString1AsString2.get(s1);
                 if (s2==null) s2=s1;
-                s2="("+line+")"+s2;
+                s2="("+line+"|"+s1+")"+s2;
                 s2=s2.replaceAll("ALIGN=TOP","ALIGN=CENTER");
                 s2="<HTML>"
                  +"<base href='file:"+a.path+"/symbols/  '/>"
@@ -942,28 +1227,8 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
 
       public ModelListVariables()
       {
-          //here we reset the table
           
-          Application0 a=(Application0)Application.getInstance();
-
-          if (a.frame0!=null)
-          {
-          if (a.frame0.source1!=null)
-             {
-           if (a.frame0.source1.variables!=null)
-           {
-                Iterator<String> it=a.frame0.source1.variables.iterator();
-
-               while(it.hasNext())
-               {
-                String s1=it.next();
-                listVariables0.add(s1);
-                                 
-                }
-              }
-             }
-            }
-        }
+      }
 
       public String getElementAt(int line)
       {
@@ -975,7 +1240,7 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
                s2=a.frame0.source1.htlmldefString1AsString2.get(s1);
                 if (s2==null) s2=s1;
                 String s3=a.frame0.source1.variableAndType.get(s1);
-                s2="("+line+")"+s2+"["+s3+"]";
+                s2="("+line+"|"+s1+")"+s2+"["+s3+"]";
                 
                 s2=s2.replaceAll("ALIGN=TOP","ALIGN=CENTER");
                 s2="<HTML>"

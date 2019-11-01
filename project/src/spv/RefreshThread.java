@@ -5,15 +5,24 @@
 //********************************************************************/
 
 package spv;
-import spv.gen.DemonstrationConstants;
-import java.io.Serializable;
 
-
-public class AppliedItem implements java.io.Serializable {
-   
-    public String name="";
-    public int type=DemonstrationConstants.THEOREM_FROM_COMPOSED_THEOREM;
-    public float priority=0;
-    
+public class RefreshThread extends Thread
+{
+ DemonstrationEditor editor=null;
+ public RefreshThread(DemonstrationEditor e)
+ {
+  this.editor=e;
+ }
+ @Override
+public void run()
+{
+ do
+ {
+  if (this.editor.stop){break;}
+  if (this.editor.weHaveFoundTheProof){break;}
+  this.editor.refreshTree();
+ }
+ while(true);
+}
 
 }

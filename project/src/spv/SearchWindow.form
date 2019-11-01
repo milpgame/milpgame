@@ -79,7 +79,9 @@
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="1" attributes="0">
                                       <Component id="contentTickButton" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace pref="424" max="32767" attributes="0"/>
+                                      <EmptySpace pref="326" max="32767" attributes="0"/>
+                                      <Component id="verifyButton" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
                                       <Component id="syntaxButton" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
                                   </Group>
@@ -89,10 +91,10 @@
                           <Group type="102" alignment="0" attributes="0">
                               <Component id="searchContentNonfunctionalLabel" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="derulare_continut" pref="714" max="32767" attributes="0"/>
+                              <Component id="derulare_continut" pref="719" max="32767" attributes="0"/>
                           </Group>
-                          <Component id="jScrollPane1" alignment="0" pref="816" max="32767" attributes="0"/>
-                          <Component id="editTab" alignment="0" pref="816" max="32767" attributes="1"/>
+                          <Component id="jScrollPane1" alignment="0" pref="821" max="32767" attributes="0"/>
+                          <Component id="editTab" alignment="0" max="32767" attributes="1"/>
                           <Group type="102" alignment="0" attributes="0">
                               <Component id="addButton" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
@@ -126,6 +128,7 @@
                   <Component id="correctnessLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="syntaxButton" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="contentTickButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="verifyButton" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
@@ -194,31 +197,38 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="tableConstantsNonfunctionalLabel" alignment="0" pref="173" max="32767" attributes="1"/>
-                                  <Component id="jScrollPane3" alignment="0" min="-2" pref="173" max="-2" attributes="1"/>
-                              </Group>
+                              <Component id="jScrollPane3" min="-2" pref="173" max="-2" attributes="1"/>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
-                          <Group type="102" alignment="1" attributes="0">
-                              <Component id="insertConstantButton" min="-2" max="-2" attributes="1"/>
-                              <EmptySpace min="-2" pref="43" max="-2" attributes="0"/>
+                          <Group type="103" alignment="0" groupAlignment="0" attributes="0">
+                              <Group type="102" alignment="1" attributes="0">
+                                  <Component id="insertConstantButton" min="-2" max="-2" attributes="1"/>
+                                  <EmptySpace min="-2" pref="43" max="-2" attributes="0"/>
+                              </Group>
+                              <Group type="102" alignment="1" attributes="0">
+                                  <Group type="103" groupAlignment="1" attributes="0">
+                                      <Component id="searchInConstantsText" alignment="0" pref="173" max="32767" attributes="0"/>
+                                      <Component id="tableConstantsNonfunctionalLabel" alignment="1" pref="173" max="32767" attributes="1"/>
+                                  </Group>
+                                  <EmptySpace max="-2" attributes="0"/>
+                              </Group>
                           </Group>
                       </Group>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" attributes="0">
-                              <EmptySpace min="-2" pref="77" max="-2" attributes="0"/>
-                              <Component id="tableVariablesNonfunctionalLabel" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <Group type="102" alignment="0" attributes="0">
-                              <EmptySpace min="-2" pref="66" max="-2" attributes="0"/>
-                              <Component id="jScrollPane2" min="-2" pref="193" max="-2" attributes="1"/>
-                          </Group>
                           <Group type="102" alignment="0" attributes="0">
                               <EmptySpace min="-2" pref="124" max="-2" attributes="0"/>
                               <Component id="insertVariableButton" min="-2" max="-2" attributes="1"/>
                           </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace min="-2" pref="66" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="searchInVariablesText" alignment="0" max="32767" attributes="1"/>
+                                  <Component id="jScrollPane2" alignment="0" pref="193" max="32767" attributes="1"/>
+                                  <Component id="tableVariablesNonfunctionalLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                          </Group>
                       </Group>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
                               <EmptySpace min="-2" pref="108" max="-2" attributes="0"/>
@@ -226,16 +236,18 @@
                                   <Component id="tableContentNonfunctionalLabel" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Component id="jScrollPane4" alignment="0" min="-2" pref="202" max="-2" attributes="1"/>
                               </Group>
-                              <EmptySpace min="-2" pref="59" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="64" max="-2" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="1" attributes="0">
                               <EmptySpace min="-2" pref="172" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="1" attributes="0">
-                                  <Component id="moveDownContentButton" alignment="0" pref="94" max="32767" attributes="1"/>
-                                  <Component id="deleteContentButton" alignment="0" pref="94" max="32767" attributes="1"/>
-                                  <Component id="moveUpContentButton" alignment="0" pref="94" max="32767" attributes="1"/>
+                                  <Component id="moveDownContentButton" alignment="0" max="32767" attributes="1"/>
+                                  <Component id="deleteContentButton" alignment="0" pref="89" max="32767" attributes="1"/>
+                                  <Component id="moveUpContentButton" alignment="0" pref="89" max="32767" attributes="1"/>
                               </Group>
-                              <EmptySpace min="-2" pref="103" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="DeleteAllContentButton" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -245,23 +257,33 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace max="32767" attributes="0"/>
-                      <Group type="103" groupAlignment="1" attributes="0">
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="tableContentNonfunctionalLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="tableConstantsNonfunctionalLabel" alignment="3" min="-2" pref="14" max="-2" attributes="0"/>
-                          </Group>
-                          <Component id="tableVariablesNonfunctionalLabel" alignment="1" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="tableContentNonfunctionalLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="tableConstantsNonfunctionalLabel" alignment="3" min="-2" pref="14" max="-2" attributes="0"/>
+                          <Component id="tableVariablesNonfunctionalLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="1" attributes="0">
-                          <Component id="jScrollPane3" alignment="1" min="-2" pref="151" max="-2" attributes="1"/>
-                          <Component id="jScrollPane2" alignment="1" min="-2" pref="149" max="-2" attributes="1"/>
                           <Group type="102" alignment="0" attributes="0">
                               <Component id="jScrollPane4" min="-2" pref="91" max="-2" attributes="1"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="moveUpContentButton" min="-2" max="-2" attributes="1"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="moveDownContentButton" min="-2" max="-2" attributes="1"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="moveDownContentButton" alignment="3" min="-2" max="-2" attributes="1"/>
+                                  <Component id="DeleteAllContentButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                          </Group>
+                          <Group type="102" alignment="1" attributes="0">
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="searchInConstantsText" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="searchInVariablesText" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="jScrollPane2" alignment="1" min="0" pref="0" max="32767" attributes="1"/>
+                                  <Component id="jScrollPane3" alignment="1" pref="118" max="32767" attributes="1"/>
+                              </Group>
                           </Group>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
@@ -430,6 +452,36 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="insertVariableButtonActionPerformed"/>
               </Events>
             </Component>
+            <Component class="javax.swing.JButton" name="DeleteAllContentButton">
+              <Properties>
+                <Property name="foreground" type="java.awt.Color" resourceKey="DeleteAllContentButton.foreground"/>
+                <Property name="text" type="java.lang.String" resourceKey="DeleteAllContentButton.text"/>
+                <Property name="name" type="java.lang.String" value="DeleteAllContentButton" noResource="true"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="DeleteAllContentButtonActionPerformed"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JTextField" name="searchInConstantsText">
+              <Properties>
+                <Property name="foreground" type="java.awt.Color" resourceKey="searchInConstantsText.foreground"/>
+                <Property name="text" type="java.lang.String" resourceKey="searchInConstantsText.text"/>
+                <Property name="name" type="java.lang.String" value="searchInConstantsText" noResource="true"/>
+              </Properties>
+              <Events>
+                <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="searchInConstantsTextKeyTyped"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JTextField" name="searchInVariablesText">
+              <Properties>
+                <Property name="foreground" type="java.awt.Color" resourceKey="searchInVariablesText.foreground"/>
+                <Property name="text" type="java.lang.String" resourceKey="searchInVariablesText.text"/>
+                <Property name="name" type="java.lang.String" value="searchInVariablesText" noResource="true"/>
+              </Properties>
+              <Events>
+                <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="searchInVariablesTextKeyTyped"/>
+              </Events>
+            </Component>
           </SubComponents>
         </Container>
       </SubComponents>
@@ -571,6 +623,16 @@
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
       </AuxValues>
+    </Component>
+    <Component class="javax.swing.JButton" name="verifyButton">
+      <Properties>
+        <Property name="foreground" type="java.awt.Color" resourceKey="verifyButton.foreground"/>
+        <Property name="text" type="java.lang.String" resourceKey="verifyButton.text"/>
+        <Property name="name" type="java.lang.String" value="verifyButton" noResource="true"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="verifyButtonActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

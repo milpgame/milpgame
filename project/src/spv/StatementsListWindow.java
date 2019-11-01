@@ -129,7 +129,7 @@ public class StatementsListWindow extends javax.swing.JDialog {
           item.items=Source.copyTheListOfConstantAndVariable(a.frame0.currentDemonstrationEditor.
                              listOfStatements.get(this.selectedRow).items);
 
-          a.frame0.currentDemonstrationEditor.demonstrationSource.downLink.add(item);
+          a.frame0.currentDemonstrationEditor.demonstrationSource.downLink.add(0, item);
          
           
           a.frame0.currentDemonstrationEditor.verifyRepetition

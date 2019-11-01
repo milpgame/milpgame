@@ -427,7 +427,7 @@ if (root.containedItems.size()>0)
 //we go through the items of root of file type
  for (int i1=0;i1<windowDimension;i1++)
  {
-     if(position+i1<dimension)
+     if((position+i1<dimension)&(position+i1>=0))
      {
       subordinatedItem=root.containedItems.get(position+i1);
       this.createVisualItem(subordinatedItem,basePanel);
@@ -496,7 +496,7 @@ next.addActionListener(new java.awt.event.ActionListener() {
 public void actionPerformed(java.awt.event.ActionEvent evt) {
  int max=root.containedItems.size();
  ParsingItem item1=root;
- if (position+windowDimension<max)
+ if ((position+windowDimension<max)&(position+windowDimension>=0))
  {
   item1=root.containedItems.get(position+windowDimension);
  }
@@ -995,6 +995,42 @@ private void createVisualTheoremItem
        x=x+width1+xSpace;
       //END edit Button
       }
+
+     //add rules button
+        //we display the button only if the source is editable
+      javax.swing.JButton addRulesButton=this.createButton("Add all rules to LR");
+       addRulesButton.addActionListener(
+            new java.awt.event.ActionListener()
+        {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+             pressedAddRulesButton(evt);
+            }
+        });
+       Dimension d_addRules=addRulesButton.getPreferredSize();
+        width1=150;
+        height1=d_addRules.height;
+
+          x=xMargin+referenceWidth/2-width1/2;
+          y=y+maximumBaseHeight+ySpace;
+          maximumBaseHeight=height1;
+
+      if (y+height1+ySpace>baseHeight)
+        {
+            int dist=y+height1+ySpace-baseHeight;
+            baseHeight=baseHeight+dist;
+
+        }
+      basePanel.setPreferredSize(
+              new Dimension(referenceWidth+xRightSpace,baseHeight));
+      basePanel.add(addRulesButton);
+      addRulesButton.setBounds(x, y, width1,height1);
+
+      if(height1>maximumBaseHeight) maximumBaseHeight=height1;
+       x=x+width1+xSpace;
+      //END add rules Button
+
         //we verify if has hypotheses
              if (theoremItem.hypotheses!=null)
              {
@@ -2026,12 +2062,169 @@ frame.filesTab.add(display,demonstrationEditor);
 
 
 }
+public void pressedAddRulesButton(java.awt.event.ActionEvent evt)
+{
+
+if (selectedItem!=null)
+{
+ ParsingItem theoremLabelItem=selectedItem;
+ ParsingItem equalItem=null;
+//with this cursor we go through compressed demonstration
+int demonstrationCursor=0;
+//the list of theorems and axioms used in demonstration
+List<String> nameList=new java.util.ArrayList<String>();
+//the index from which begins the compressed demonstration
+int compressedDemonstrationIndex=0;
+
+
+if (theoremLabelItem!=null)
+{
+if (theoremLabelItem.containedItems!=null)
+{
+if (theoremLabelItem.containedItems.size()==2)
+{
+
+if ((theoremLabelItem.containedItems.get(0).codeSymbol==Source.C_P_SYMBOL)
+&(theoremLabelItem.containedItems.get(1).codeSymbol==Source.C_EQUAL_SYMBOL))
+{
+equalItem=theoremLabelItem.containedItems.get(1);
+}
+}
+}
+}
+else this.errorNewLine("Non-existing theorem label!");
+
+//we build the name list
+//the maximum index of items contained by equal label
+int maximumIndexContainedByEqualItem=0;
+if (equalItem!=null)
+{
+if (equalItem.containedItems!=null)
+{
+//the maximum index of items contained by equal label
+maximumIndexContainedByEqualItem=equalItem.containedItems.size()-1;
+//we verify if it is a compressed demonstration (if exists open parenthesis)
+if (equalItem.containedItems.get(0).textSymbol.equals("("))
+{ demonstrationCursor=0; demonstrationCursor++;
+do {
+if  ( (!equalItem.containedItems.get(demonstrationCursor).textSymbol.equals(")"))&
+(demonstrationCursor!=maximumIndexContainedByEqualItem)
+)
+{
+nameList.add(equalItem.containedItems.get(demonstrationCursor).textSymbol);
+demonstrationCursor++;
+}
+else break;
+} while (true);
+
+if (equalItem.containedItems.get(demonstrationCursor).textSymbol.equals(")"))
+{
+compressedDemonstrationIndex=demonstrationCursor+1;
+}
+else if (demonstrationCursor==maximumIndexContainedByEqualItem)
+{ this.errorNewLine("Expect )!");
+}
+}
+else  {  this.errorNewLine("Here is not a compressed proof!");}
+}
+else {}
+}
+else this.errorNewLine("Not found equal sign in the proof!");
+
+if (!nameList.isEmpty())
+{
+if(this.S!=null)
+{
+ Application0 a=(Application0)Application.getInstance();
+if(a!=null)
+{
+if(a.frame0!=null)
+{    
+   
+   int d=nameList.size();
+   
+   for(int i=0;i<d;i++)
+   {
+     String si=nameList.get(i);
+     //axioms
+     if(this.S.axioms.containsKey(si))
+     {
+       if(this.S.availableAxioms.contains(si))
+     {
+       Axiom ai=(Axiom)this.S.axioms.get(si);
+       if(ai.items!=null)
+       {
+         if(!(ai.items.isEmpty()))
+           {
+            if(ai.items.get(0).constantOrVariableText.equals("|-"))
+            {
+              
+              AppliedItem appliedItem=new AppliedItem();
+              appliedItem.name=si;
+              if(ai.type==1) {appliedItem.type=
+                                           DemonstrationConstants.SIMPLE_AXIOM;}
+                  else if(ai.type==2) {appliedItem.type=
+                              DemonstrationConstants.AXIOM_FROM_COMPOSED_AXIOM;}
+              //we add the selected item to the list of rules
+              if(a.frame0.listOfAppliedItems!=null)
+              {
+              a.frame0.listOfAppliedItems.add(appliedItem);
+              }
+            }
+           }
+       }
+     }
+     }
+     //theorems
+     if(this.S.theorems.containsKey(si))
+     {
+       if(this.S.availableTheorems.contains(si))
+     {
+       Theorem ti=(Theorem)this.S.theorems.get(si);
+       if(ti.items!=null)
+       {
+         if(!(ti.items.isEmpty()))
+           {
+            if(ti.items.get(0).constantOrVariableText.equals("|-"))
+            {
+               
+              AppliedItem appliedItem=new AppliedItem();
+              appliedItem.name=si;
+              if(ti.type==1) {appliedItem.type=
+                                        DemonstrationConstants.SIMPLE_THEOREM;}
+                  else if(ti.type==2) {appliedItem.type=
+                         DemonstrationConstants.THEOREM_FROM_COMPOSED_THEOREM;}
+              //we add the selected item to the list of rules
+              if(a.frame0.listOfAppliedItems!=null)
+              {
+              a.frame0.listOfAppliedItems.add(appliedItem);
+              }
+            }
+           }
+       }
+     }
+     }
+     
+   }
+   
+}
+}
+//end this.S
+}
+}
+
+}
+
+
+
+}
+
  public javax.swing.JLabel createLabel(String s)
 {
     javax.swing.JLabel label=new javax.swing.JLabel();
 
     label.setBackground(new java.awt.Color(4, 255, 129));
-    label.setForeground(new java.awt.Color(255, 255, 255));
+    label.setForeground(new java.awt.Color(0, 0, 0));
     label.setFont(new java.awt.Font("Arial", 0, 14));
     label.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
     label.setFocusCycleRoot(true);

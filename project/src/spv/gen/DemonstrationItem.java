@@ -300,7 +300,7 @@ displayedText=
 "<HTML>"
  +"<base href='file:"+a.path+"/symbols/  '/>"
  +"<P CLASS='western' STYLE='margin-bottom: 0cm; background: #04ff81'>"
- +"<FONT COLOR='#ffffff' SIZE=3 >"
+ +"<FONT COLOR='#000000' SIZE=3 >"
 +displayedText
 +"</FONT>"
 +"</P>"

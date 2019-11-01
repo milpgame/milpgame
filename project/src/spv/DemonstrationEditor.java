@@ -90,6 +90,8 @@ public javax.swing.JButton strategySwitch=null;
 public javax.swing.JButton exit=null;
 public javax.swing.JButton saveDemonstration=null;
 public javax.swing.JButton openDemonstration=null;
+public javax.swing.JButton automatedSearching=null;
+public javax.swing.JButton stopSearching=null;
 javax.swing.JTree demonstrationTree=null;
 DemonstrationItem demonstrationSource=null;
 //variable used for new statements chaining
@@ -151,7 +153,9 @@ int baseMaximumHeightBeforeDemonstration=0;
   public List<String> vector_a_p=new ArrayList<String>();
   public String demonstrationString="";
   public int stringCounter=0;
-  public int stringDimension=80;
+  public String demonstrationStringI="";
+  public int stringCounterI=0;
+  public int stringDimension=79;
   //number of hub statements from demonstration
   public int numberOfHubs=0;
   public int numberOfHubs2=0;
@@ -179,6 +183,12 @@ int baseMaximumHeightBeforeDemonstration=0;
  public boolean weFoundHubWithIndex=false;
  public int howManyRepetitionsWeHave=0;
  public boolean weDestroyedHubOrRepetition=false;
+ public boolean weHaveFoundTheProof=false;
+ public boolean stop=false;
+ public List<String> loopRules=new ArrayList<String>();
+ public boolean weFoundARepetitionWithIndexAndWePasteProof=false;//forward chaining
+ DemonstrationItem demonstrationBeginning=null;//forward chaining
+ public int lastHub=0;//last hub
  public DemonstrationEditor(
                            Source source1,
                            MainWindow window,
@@ -262,6 +272,7 @@ int baseMaximumHeightBeforeDemonstration=0;
          if (item!=null)
          {
              this.selectedDemonstrationItem0=item;//we memorize the selection
+             String header="";
          if (
               (this.selectedDemonstrationItem0.type==DemonstrationConstants.NEW_STATEMENT)
               |(this.selectedDemonstrationItem0.type==DemonstrationConstants.TARGET)
@@ -296,8 +307,68 @@ int baseMaximumHeightBeforeDemonstration=0;
              this.frame.branchDeletingButton.setEnabled(true);
              }
              }
-             
+
+
+              String s="";
+              if(this.selectedDemonstrationItem0.items!=null)
+              {
+              if(!this.selectedDemonstrationItem0.items.isEmpty())
+              {
+              int max= this.selectedDemonstrationItem0.items.size();
+              
+               for (int i=0;i<max;i++)
+               {
+                String  s1=this.selectedDemonstrationItem0.items.
+                                                  get(i).constantOrVariableText;
+                 s=s+" "+s1;
+               }
+              }
+              }
+              this.frame.textField.setText(s);
+
+
+
          }
+         else if(
+                 (item.type==DemonstrationConstants.SIMPLE_THEOREM)|
+                 (item.type==DemonstrationConstants.THEOREM_FROM_COMPOSED_THEOREM)
+                )
+             {
+                 header = "Theorem ";
+             }
+             else
+                if (
+                 (item.type==DemonstrationConstants.SIMPLE_AXIOM)|
+                 (item.type==DemonstrationConstants.AXIOM_FROM_COMPOSED_AXIOM)
+                )
+             {
+                 header = "Axiom ";
+             }
+             else
+                if
+                (
+                 (item.type==DemonstrationConstants.PROPER_HYPOTHESIS)
+                )
+             {
+                 header = "Hypothesis ";
+             }
+           if(!header.equals(""))
+            {
+             String propertiesText=item.name;
+             propertiesText=
+                     "<HTML> Properties of: <br>"
+                     +header
+                     +propertiesText
+                     +"</HTML>";
+            
+             this.frame.propertiesButton.setText(propertiesText);
+             this.frame.nameOfSelectedItem=item.name;
+             this.frame.typeOfSelectedItem=item.type;
+            }
+
+
+
+
             
          }
      }
@@ -838,7 +909,7 @@ private void createVisualItemTheorem
         
       
        //extraction button
-       demonstrationExtraction=this.createButton("Extract the proof string");
+       demonstrationExtraction=this.createButton("Extract the proof string Wait");
        demonstrationExtraction.addActionListener(
             new java.awt.event.ActionListener()
         {
@@ -885,15 +956,65 @@ private void createVisualItemTheorem
                    vector_a_p.clear();
                    demonstrationString="";
                    stringCounter=0;
-                   
-                   findHubsAndRepetitions(demonstrationSource);
+                   demonstrationBeginning=null;
+                   if (demonstrationSource.downLink!=null)
+                  {
+                    if(!demonstrationSource.downLink.isEmpty())
+                    {
+                      int max=demonstrationSource.downLink.size();
+                     for(int i=0;i<max;i++)
+                     {
+                      if(Source.isEqualXWithY
+                              (demonstrationSource.items,
+                              demonstrationSource.downLink.get(i).items
+                              )
+                         )
+                      {
+                       demonstrationBeginning=demonstrationSource.downLink.get(i);
+                       break;
+                      }
+                     }
+
+                   }
+                   }
+
+                   if(demonstrationBeginning!=null)
+                   {
+                       //here we find hubs that are outside of the main proof
+                       // and we tranform them into repetions
+
+                     int max0=demonstrationSource.downLink.size();
+                    for(int i0=0;i0<max0;i0++)
+                    {
+                     DemonstrationItem itemI0=demonstrationSource.downLink.get(i0);
+                     if(!itemI0.equals(demonstrationBeginning))
+                     {
+                      findHubsThatAreOutside(itemI0);
+                     }
+                    }
+                    //we clear all the descendents of demonstrationSource
+                    //and we leave only de demonstrationBeginning
+                    demonstrationSource.downLink.clear();
+                    demonstrationSource.downLink.add(demonstrationBeginning);
+                    demonstrationBeginning.aboveLink=demonstrationSource;
+
+
+
+
+                     
+                   findHubsAndRepetitions(demonstrationBeginning);
                    recoverNewHubs();
-                   crossingRenumberingHubs(demonstrationSource);
+                   verifyIfRepetitionIsValid();
+                   crossingRenumberingHubs(demonstrationBeginning);
                    reupdateDemonstrationTree();
                    saveForwardChaining();
-                   JFrame mainFrame = Application0.getApplication().getMainFrame();
+                   JFrame mainFrame = Application0.getApplication().
+                                                                getMainFrame();
                    Application0.getApplication().
-                                   show(new ExtractionStringWindow(mainFrame,true));
+                               show(new ExtractionStringWindow(mainFrame,true));
+
+                   }
+
                  }
                 }
             }
@@ -1037,20 +1158,20 @@ private void createVisualItemTheorem
        x=x+width1+xSpace;
       //END open button
 
-      /*
+     
         //automation button
 
-       openDemonstration=this.createButton("Automation");
-       openDemonstration.addActionListener(
+       automatedSearching=this.createButton("Automated search");
+       automatedSearching.addActionListener(
             new java.awt.event.ActionListener()
         {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-             automation();
+             proofFindingFunction();
             }
         });
-       Dimension automationDimension= openDemonstration.getPreferredSize();
+       Dimension automationDimension= automatedSearching.getPreferredSize();
         width1=200;
         height1=automationDimension.height;
 
@@ -1066,15 +1187,53 @@ private void createVisualItemTheorem
     }
       basePanel.setPreferredSize(
               new Dimension(referenceWidth+xSpaceRight,baseHeight));
-      basePanel.add(openDemonstration);
-      openDemonstration.setBounds(x, y, width1,height1);
+      basePanel.add(automatedSearching);
+      automatedSearching.setBounds(x, y, width1,height1);
 
       if(height1>maximumHeightBase) maximumHeightBase=height1;
        x=x+width1+xSpace;
+
+       automatedSearching.setEnabled(false);//we block this button
+       
       //END automation button
 
-       *
-       */
+        //stop searching button
+
+       stopSearching=this.createButton("Stop searching");
+       stopSearching.addActionListener(
+            new java.awt.event.ActionListener()
+        {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+             stopFunction();
+            }
+        });
+       Dimension stopDimension= stopSearching.getPreferredSize();
+        width1=200;
+        height1=stopDimension.height;
+
+          x=xMargin+referenceWidth/2-width1/2;
+          y=y+maximumHeightBase+ySpace;
+          maximumHeightBase=height1;
+
+      if (y+height1+ySpace>baseHeight)
+    {
+        int distance=y+height1+ySpace-baseHeight;
+        baseHeight=baseHeight+distance;
+
+    }
+      basePanel.setPreferredSize(
+              new Dimension(referenceWidth+xSpaceRight,baseHeight));
+      basePanel.add(stopSearching);
+      stopSearching.setBounds(x, y, width1,height1);
+
+      if(height1>maximumHeightBase) maximumHeightBase=height1;
+       x=x+width1+xSpace;
+
+       stopSearching.setEnabled(false);//we block this buttn
+      //END stop searching button
+      
         //exit button
       
        exit=this.createButton("Close");
@@ -1402,61 +1561,9 @@ catch(ClassNotFoundException e)
 }
 public void automation()
 {
-  this.backwardChainingSearch(demonstrationSource, 0,0);
- /*
-    javax.swing.JPanel basePanel=null;
-    basePanel=(javax.swing.JPanel)demonstrationTree.getParent();
-
- if(basePanel!=null)
- {
-  this.backwardChainingSearch(demonstrationSource, 0);
- //redisplay demonstration
- basePanel.remove(demonstrationTree);
- //restoration
- x=xBeforeDemonstration;
- y=yBeforeDemonstration;
- referenceWidth=baseWidthBeforeDemonstration;
- baseHeight=baseHeightBeforeDemonstration;
- maximumHeightBase=baseMaximumHeightBeforeDemonstration;
- //END restoration
- if (demonstrationSource!=null)
-{
-   demonstrationTree=
-           createDemonstrationTree(demonstrationSource);
-   Dimension d2=demonstrationTree.getPreferredSize();
-    width1=d2.width;
-    height1=d2.height;
-
-      x=xMargin;
-      y=y+maximumHeightBase+ySpace;
-      maximumHeightBase=height1;
-
-  if (y+height1+ySpace>baseHeight)
-{
-      int dist=y+height1+ySpace-baseHeight;
-    baseHeight=baseHeight+dist;
-}
-
- int width=0;
- width=referenceWidth;
- if (referenceWidth<width1) width=width1;
-
-  basePanel.setPreferredSize(
-       new Dimension(width+10*xSpaceRight,baseHeight));
-  basePanel.add(demonstrationTree);
-  demonstrationTree.setBounds(x, y, width1,height1);
-
-  if(height1>maximumHeightBase) maximumHeightBase=height1;
-   x=x+width1+xSpace;
- //redesign base panel
- basePanel.revalidate();
- basePanel.repaint();
- basePanel.repaint();
-}
-//END redisplay demonstration
- }
-  *
-  */
+  this.weHaveFoundTheProof=
+                          this.backwardChainingSearch(demonstrationSource, 0,0);
+ 
 }
 
 public void close()
@@ -3436,7 +3543,7 @@ if  (xTheorem.type==2)
          stackItemsCursor=0;
              for (int j=position0;j<=(position0+n-1);j++)
             {
-             //we add the item to the stackSelectedItems
+             //we add the item to the stackSelectedItems---error out of bounds
              stackSelectedItems.add(this.demonstrationSource.downLink.get(j));
 
             }
@@ -3871,69 +3978,117 @@ void changeStrategyButton(java.awt.event.ActionEvent evt,
 }
 void saveForwardChaining()
 {
-  DemonstrationItem demonstrationBeginning=null;
-
- if (this.demonstrationSource.downLink!=null)
-  {
-    if(!demonstrationSource.downLink.isEmpty())
-    {
-      int max=demonstrationSource.downLink.size();
-     for(int i=0;i<max;i++)
-     {
-      if(Source.isEqualXWithY
-              (this.demonstrationSource.items,
-              demonstrationSource.downLink.get(i).items
-              )
-         )
-      {
-       demonstrationBeginning=demonstrationSource.downLink.get(i);
-       break;
-      }
-     }
-
-   }
-   }
+ 
   if (demonstrationBeginning!=null)
   {
+   //System.out.println("--------");
    SyntacticItem arbore=null;
    arbore=crossing0ForwardChaining(demonstrationBeginning);
-  
-   this.findRepetition(arbore, arbore);
+   cleanNulls(arbore);
+   this.findRepetition(arbore, arbore);// n p e
    //we do the renumbering of hubs and repetitions
    int initial=numberOfHubs2;
+   //System.out.println("Initial no. of Hubs:"+initial);
    this.numberOfHubs2=0;
    this.crossingRenumberingHubsS(arbore, arbore,initial);
+   //System.out.println("Second no. of Hubs:"+this.numberOfHubs2);
    this.numberOfHubs2=0;
    this.crossingRenumberingHubsS(arbore, arbore,0);
+    //System.out.println("Third no. of Hubs:"+this.numberOfHubs2);
    //END renumbering
    this.findVector_a_p(arbore);
    this.displayVector_a_p();
+   lastHub=0;//we reset hub counter;
+   
    crossing1ForwardChaining(arbore);
   }
 
   
 }
+public void viewSpecificHubs(SyntacticItem tree)
+{
+  if (tree!=null)
+  {
+     if (tree.hub)
+      {
+                if((tree.repetitionNumber==102)|(tree.repetitionNumber==103))
+                 {
+                 System.out.println("Hub no.: "+tree.repetitionNumber
+                 +" def.:"+tree.definitionName);
+                 }
 
+       }
+  if (tree.containedItems!=null)
+   {
+      if(!(tree.containedItems.isEmpty()))
+      {
+       int max=tree.containedItems.size();
+       for(int i=0;i<max;i++)
+       {
+        viewSpecificHubs(tree.containedItems.get(i));
+       }
+
+      }
+   }
+  }
+
+
+}
 public void displayVector_a_p()
 {
 int max=vector_a_p.size();
-demonstrationString+=" ( ";
-stringCounter=3;
+demonstrationString+="      ( ";
+stringCounter=8;
+int stringCounter0=0;
+String demonstrationString0="";
 for(int i=0;i<max;i++)
 {
- stringCounter+=vector_a_p.get(i).length()+1;
- demonstrationString+=vector_a_p.get(i)+" ";
- if(stringCounter>=stringDimension){
-                    demonstrationString+="\n";
-                    stringCounter=0;
+ stringCounter0=vector_a_p.get(i).length()+1;
+ demonstrationString0=vector_a_p.get(i)+" ";
+ if((stringCounter+stringCounter0)>stringDimension)
+                    {
+                    
+                     String rest="";
+                     int dim=stringDimension-stringCounter;
+                     for(int i0=0;i0<dim;i0++)
+                     {
+                      rest+=" ";   
+                     }
+                    demonstrationString+=rest+"\n";
+                    demonstrationString+="      "+demonstrationString0;
+                    stringCounter=6+stringCounter0;
                     }
+                    else
+                    {
+                     demonstrationString+=demonstrationString0;
+                     stringCounter+=stringCounter0;
+
+                    }
+
 }
-demonstrationString+=" ) ";
-stringCounter+=3;
-if(stringCounter>=stringDimension){
-                    demonstrationString+="\n";
-                    stringCounter=0;
-                  }
+
+
+demonstrationString0=" ) ";
+stringCounter0=3;
+if((stringCounter+stringCounter0)>stringDimension)
+                    {
+
+                     String rest="";
+                     int dim=stringDimension-stringCounter;
+                     for(int i0=0;i0<dim;i0++)
+                     {
+                      rest+=" ";
+                     }
+                    demonstrationString+=rest+"\n";
+                    demonstrationString+="      "+demonstrationString0;
+                    stringCounter=6+stringCounter0;
+                    }
+                    else
+                    {
+                     demonstrationString+=demonstrationString0;
+                     stringCounter+=stringCounter0;
+
+                    }
 }
 
  public void findVector_a_p(SyntacticItem syntacticItem)
@@ -4081,7 +4236,7 @@ if(demonstrationItem.downLink!=null)
 if(!demonstrationItem.downLink.isEmpty())
 {
   DemonstrationItem firstItem=demonstrationItem.downLink.get(0);
-  
+
  if((firstItem.type==DemonstrationConstants.AXIOM_FROM_COMPOSED_AXIOM)
      |(firstItem.type==DemonstrationConstants.THEOREM_FROM_COMPOSED_THEOREM)
     )
@@ -4093,8 +4248,8 @@ if(!demonstrationItem.downLink.isEmpty())
                   new java.util.HashMap<String,java.util.List<ConstantAndVariable>>();
    if(!this.S.unifyTemplateWithBase(ax.items, demonstrationItem.items, variableAndContent0))
        { System.out.println("Inadequacy axiom:"+ax.name+" statement: "+demonstrationItem.name); }
-   
-   
+
+
    if(firstItem.downLink!=null)
    {
    int max=firstItem.downLink.size();
@@ -4286,7 +4441,7 @@ if(!demonstrationItem.downLink.isEmpty())
            syntacticItem.definitionName=level2.name;
            syntacticItem.a_p_v=4;//we mark that we are dealing with proper hypothesis
            ret.containedItems.add(syntacticItem);
-          }  
+          }
        }
       }
      }
@@ -4366,10 +4521,11 @@ if(!demonstrationItem.downLink.isEmpty())
 }
 
 }
- 
+
 }
 return ret;
 }
+
 public void treeReorganization(SyntacticItem syntacticItem)
 {
   List<SyntacticItem> list=new ArrayList<SyntacticItem>();
@@ -4436,6 +4592,7 @@ public void treeReorganization(SyntacticItem syntacticItem)
 }
 public void flatbetDisplay(SyntacticItem syntacticItem)
 {
+  String restA="",restB="";//strings used for splitting
   if (syntacticItem!=null)
   {
    if ( (syntacticItem.a_p_v==1)
@@ -4457,19 +4614,44 @@ public void flatbetDisplay(SyntacticItem syntacticItem)
      int numberOfHypotheses=this.baseTheorem.hypotheses.size();
       if (position0>-1)
       {
-         stringCounter+=this.alphabetic
+         stringCounterI=this.alphabetic
                          (numberOfVariables+numberOfHypotheses+position0+1).length();
-         demonstrationString+=this.alphabetic
+         demonstrationStringI=this.alphabetic
                          (numberOfVariables+numberOfHypotheses+position0+1);
          
-        if(syntacticItem.hub){ demonstrationString+="Z";
+        if(syntacticItem.hub){ 
+                              demonstrationStringI+="Z";lastHub++;
+                              stringCounterI++;
                          
-                        }
-         stringCounter++;
-         if(stringCounter>=stringDimension)
+                             }
+        
+         if((stringCounter+stringCounterI)>stringDimension)
          {
-          demonstrationString+="\n";
-          stringCounter=0;
+           
+           //we split the demonstrationStringI in two
+           int dim=stringDimension-stringCounter;
+           if(dim>0)
+           {
+           restA=demonstrationStringI.substring(0, dim);
+           restB="      "+demonstrationStringI.substring(dim);
+           }
+           else {restA="";restB="      "+demonstrationStringI;}
+
+          demonstrationString+=restA+"\n";
+          demonstrationString+=restB;
+          stringCounter=restB.length();
+          /*if( !((restA+restB).equals(demonstrationStringI)) )
+          {
+           
+           System.out.println(restA+" + "+restB+" != "+demonstrationStringI
+           +" dim= "+dim+" sD= "+stringDimension+" sC= "+stringCounter);
+          }
+           */
+         }
+         else
+         {
+          demonstrationString+=demonstrationStringI;
+          stringCounter+=stringCounterI;
          }
 
       }
@@ -4491,13 +4673,36 @@ public void flatbetDisplay(SyntacticItem syntacticItem)
 
       if (position0>-1)
       {
-        stringCounter+=this.alphabetic(position0+1).length();
-        demonstrationString+=this.alphabetic(position0+1);
+        stringCounterI=this.alphabetic(position0+1).length();
+        demonstrationStringI=this.alphabetic(position0+1);
         
-        if(stringCounter>=stringDimension)
+        if((stringCounter+stringCounterI)>stringDimension)
          {
-          demonstrationString+="\n";
-          stringCounter=0;
+           
+            //we split the demonstrationStringI in two
+           int dim=stringDimension-stringCounter;
+           if(dim>0)
+           {
+           restA=demonstrationStringI.substring(0, dim);
+           restB="      "+demonstrationStringI.substring(dim);
+           }
+           else {restA="";restB="      "+demonstrationStringI;}
+           
+          demonstrationString+=restA+"\n";
+          demonstrationString+=restB;
+          stringCounter=restB.length();
+          /*if( !((restA+restB).equals(demonstrationStringI)) )
+          {
+            
+           System.out.println(restA+" + "+restB+" != "+demonstrationStringI
+           +" dim= "+dim+" sD= "+stringDimension+" sC= "+stringCounter);
+          }
+           */
+         }
+         else
+         {
+          demonstrationString+=demonstrationStringI;
+          stringCounter+=stringCounterI;
          }
       }
 
@@ -4519,13 +4724,36 @@ public void flatbetDisplay(SyntacticItem syntacticItem)
       int numberOfVariables=this.baseTheorem.totalVariables.size();
       if (position0>-1)
       {
-        stringCounter+=this.alphabetic(numberOfVariables+position0+1).length();
-        demonstrationString+=this.alphabetic(numberOfVariables+position0+1);
+        stringCounterI=this.alphabetic(numberOfVariables+position0+1).length();
+        demonstrationStringI=this.alphabetic(numberOfVariables+position0+1);
         
-         if(stringCounter>=stringDimension)
+        if((stringCounter+stringCounterI)>stringDimension)
          {
-          demonstrationString+="\n";
-          stringCounter=0;
+            
+            //we split the demonstrationStringI in two
+           int dim=stringDimension-stringCounter;
+           if(dim>0)
+           {
+           restA=demonstrationStringI.substring(0, dim);
+           restB="      "+demonstrationStringI.substring(dim);
+           }
+           else {restA="";restB="      "+demonstrationStringI;}
+           
+          demonstrationString+=restA+"\n";
+          demonstrationString+=restB;
+          stringCounter=restB.length();
+          /*if( !((restA+restB).equals(demonstrationStringI)) )
+          {
+            
+           System.out.println(restA+" + "+restB+" != "+demonstrationStringI
+           +" dim= "+dim+" sD= "+stringDimension+" sC= "+stringCounter);
+          }
+          */
+         }
+         else
+         {
+          demonstrationString+=demonstrationStringI;
+          stringCounter+=stringCounterI;
          }
       }
 
@@ -4538,15 +4766,38 @@ public void flatbetDisplay(SyntacticItem syntacticItem)
      int numberOfHypotheses=this.baseTheorem.hypotheses.size();
       if (syntacticItem.repetitionNumber>0)
       {
-        stringCounter+=this.alphabetic
+        if(syntacticItem.repetitionNumber>lastHub){System.out.println("rep: "+syntacticItem.repetitionNumber+">"+lastHub);}
+        stringCounterI=this.alphabetic
                (numberOfVariables+numberOfHypotheses+max+syntacticItem.repetitionNumber).length();
-        demonstrationString+=this.alphabetic
+        demonstrationStringI=this.alphabetic
                         (numberOfVariables+numberOfHypotheses+max+syntacticItem.repetitionNumber);
         
-        if(stringCounter>=stringDimension)
+        if((stringCounter+stringCounterI)>stringDimension)
          {
-          demonstrationString+="\n";
-          stringCounter=0;
+           
+            //we split the demonstrationStringI in two
+           int dim=stringDimension-stringCounter;
+           if(dim>0)
+           {
+           restA=demonstrationStringI.substring(0, dim);
+           restB="      "+demonstrationStringI.substring(dim);
+           }
+           else {restA="";restB="      "+demonstrationStringI;}
+           
+          demonstrationString+=restA+"\n";
+          demonstrationString+=restB;
+          stringCounter=restB.length();
+          /*if( !((restA+restB).equals(demonstrationStringI)) )
+          {
+            
+           System.out.println(restA+" + "+restB+" != "+demonstrationStringI
+           +" dim= "+dim+" sD= "+stringDimension+" sC= "+stringCounter);
+          }*/
+         }
+         else
+         {
+          demonstrationString+=demonstrationStringI;
+          stringCounter+=stringCounterI;
          }
        
       }
@@ -4920,7 +5171,7 @@ void findRepetition(SyntacticItem base,SyntacticItem syntacticItem)
         for (int i=0;i<max;i++)
         {
          SyntacticItem iItem=syntacticItem.containedItems.get(i);
-         findRepetition(base,iItem);
+         findRepetition(base,iItem);// n p e
         }
      }
      }
@@ -4929,10 +5180,10 @@ void findRepetition(SyntacticItem base,SyntacticItem syntacticItem)
        {//The syntacticItem tree must have at least 2 levels
        if (syntacticItem.containedItems.size()>=1)
        {
-       if((!syntacticItem.repetition)&(!syntacticItem.hub))
+       if(!syntacticItem.repetition)
        {
         String s=syntacticItem.definitionName;
-        this.identicalItem(base,s, syntacticItem);
+        this.identicalItem(base,s, syntacticItem);// n p e
         
        }
        }
@@ -4955,7 +5206,7 @@ void identicalItem(SyntacticItem syntacticItem, String s,SyntacticItem tree)
          SyntacticItem iItem=syntacticItem.containedItems.get(i);
          if(iItem!=null)
          {
-         identicalItem(iItem,s,tree);
+         identicalItem(iItem,s,tree);// n p e
          }
         }
      }
@@ -4964,29 +5215,45 @@ void identicalItem(SyntacticItem syntacticItem, String s,SyntacticItem tree)
         {
        if(s!=null)
        {
+
+      if(syntacticItem!=tree)
+      {
       if(syntacticItem.definitionName.equals(s))
       {
         if((!syntacticItem.hub)&(!syntacticItem.repetition))
         {
-          if (this.haveIdenticalTrees(syntacticItem, tree))
+          if (this.haveIdenticalTrees(syntacticItem, tree))// n p e
           {
-           //we cut the branches
-              if (syntacticItem.containedItems!=null)
-              {
-              syntacticItem.containedItems.clear();
-              }
+           
 
              if(tree.hub)
              {
+                 /*
+                 System.out.println();
+                 this.displaySyntax(tree);
+                 System.out.println();
+                 this.displaySyntax(syntacticItem);
+                 */
+
                  //note with 5 a_p_v to avoid confusion
                  syntacticItem.a_p_v=5;
                  //we copy the repetition number
                  syntacticItem.repetitionNumber=tree.repetitionNumber;
                  //we mark as a repetition the syntactic item
                  syntacticItem.repetition=true;
+                 /*System.out.println("Hub:"+tree.repetitionNumber+"|"
+                                                          +tree.definitionName);
+                  * 
+                  */
               }
               else
               {
+                 /*
+                 System.out.println();
+                 this.displaySyntax(tree);
+                 System.out.println();
+                 this.displaySyntax(syntacticItem);
+                 */
                 //we increment the number of hubs
                 this.numberOfHubs2++;
                 //we mark the syntactic item as a hub
@@ -4996,6 +5263,18 @@ void identicalItem(SyntacticItem syntacticItem, String s,SyntacticItem tree)
                 syntacticItem.a_p_v=5;
                 syntacticItem.repetition=true;
                 syntacticItem.repetitionNumber=this.numberOfHubs2;
+                /*System.out.println("New hub:"+tree.repetitionNumber+"|"
+                                                          +tree.definitionName);
+                 * 
+                 */
+              }
+
+             //we cut the branches
+              if (syntacticItem.containedItems!=null)
+              {
+              syntacticItem.containedItems.clear();
+              }
+
               }
 
           }
@@ -5003,10 +5282,16 @@ void identicalItem(SyntacticItem syntacticItem, String s,SyntacticItem tree)
         }
 
       }
+      }
+
+
        }
        }
     }
-}
+
+
+
+
 boolean haveIdenticalTrees(SyntacticItem syntacticItem1,SyntacticItem syntacticItem2)
 {
     boolean ok=true;
@@ -5015,22 +5300,80 @@ boolean haveIdenticalTrees(SyntacticItem syntacticItem1,SyntacticItem syntacticI
     if((syntacticItem1==null)&(syntacticItem2!=null)) ok=false;
     if((syntacticItem1==null)&(syntacticItem2==null)) ok=false;
     if(syntacticItem1==syntacticItem2) ok=false;
+
+
+
     //if the definitionName is different at those two variables then we have false
      if (ok)
      {
-         if((!syntacticItem1.repetition)&(!syntacticItem2.repetition)
-           &(!syntacticItem1.hub)&(!syntacticItem2.hub))
+        if(syntacticItem1.definitionName!=null)
         {
-        if (!syntacticItem1.definitionName.equals(syntacticItem2.definitionName)) ok=false;
-        }
-        else if((syntacticItem1.repetition)|(syntacticItem2.repetition)
-                 |(syntacticItem1.hub)|(syntacticItem2.hub)
-                 )
+        if (syntacticItem2.definitionName!=null)
         {
-            if(syntacticItem1.repetitionNumber!=syntacticItem2.repetitionNumber) ok=false;
-        }
+        if (!syntacticItem1.definitionName.equals(syntacticItem2.definitionName)) ok=false;//n p e
+        } else { ok=false;
+                 System.out.println("Error at haveIdenticalTrees 2: rep.no.: "+
+                         syntacticItem2.repetitionNumber
+                         +"rep:"+syntacticItem2.repetition
+                         +"hub:"+syntacticItem2.hub
+                         +"a_p_v_h_r:"+syntacticItem2.a_p_v
+                         +"mother:"+syntacticItem2.motherVariable);
+                }
+        }else {ok=false;
+                System.out.println("Error at haveIdenticalTrees 1: rep.no.: "+
+                         syntacticItem1.repetitionNumber
+                         +"rep:"+syntacticItem1.repetition
+                         +"hub:"+syntacticItem1.hub
+                         +"a_p_v_h_r:"+syntacticItem1.a_p_v
+                         +"mother:"+syntacticItem1.motherVariable);
+               }
+      
+
      }
-    
+
+    boolean checked=false;//if it is necesary to verify down on branches
+
+    if(ok)
+    {
+       if ((syntacticItem2.hub)&(!syntacticItem2.repetition)
+          &(!syntacticItem1.hub)&(!syntacticItem1.repetition))
+       {
+         //we go further
+       }
+  else if ((syntacticItem2.hub) & (!syntacticItem2.repetition)
+          &(!syntacticItem1.hub)&(syntacticItem1.repetition))
+       {
+         if(syntacticItem2.repetitionNumber==syntacticItem1.repetitionNumber)
+         {
+          checked=true;//is not necesary to verify down on braches
+         }
+          else {ok=false;}
+       }
+
+else if((!syntacticItem2.hub) & (syntacticItem2.repetition)
+          &(!syntacticItem1.hub)&(syntacticItem1.repetition))
+       {
+         if(syntacticItem2.repetitionNumber==syntacticItem1.repetitionNumber)
+         {
+          checked=true;//is not necesary to verify down on braches
+         }
+          else {ok=false;}
+       }
+ else if ((!syntacticItem2.hub) & (syntacticItem2.repetition)
+          &(!syntacticItem1.hub)&(!syntacticItem1.repetition))
+ {
+     ok=false;
+ }
+ else if ((!syntacticItem2.hub) & (!syntacticItem2.repetition)
+          &(!syntacticItem1.hub)&(syntacticItem1.repetition))
+ {
+     ok=false;
+ }
+
+    }
+
+    if(!checked)
+    {
     if(ok)
     {
      if ((syntacticItem1.containedItems!=null)&(syntacticItem2.containedItems!=null))
@@ -5047,72 +5390,98 @@ boolean haveIdenticalTrees(SyntacticItem syntacticItem1,SyntacticItem syntacticI
         {
          SyntacticItem itemI1=syntacticItem1.containedItems.get(i);
          SyntacticItem itemI2=syntacticItem2.containedItems.get(i);
-         
+
+         if(itemI1!=null)
+         {
+
+         if(itemI2!=null)
+         {
          // if we find different sub-trees then we have false
-         if(!haveIdenticalTrees(itemI1,itemI2)){ ok=false; }
+         if(!haveIdenticalTrees(itemI1,itemI2)){ ok=false; }//n p e
+         }else ok=false;
+
+         } else ok=false;
+
         }
         }
          else ok=false;
-     }
-      else if ((syntacticItem1.containedItems.isEmpty())&
-              (!syntacticItem2.containedItems.isEmpty()))
-               {
-                ok=false;
-                if((syntacticItem1.repetitionNumber==syntacticItem2.repetitionNumber)
-                                    &(syntacticItem1.repetitionNumber!=0))
-                {
-                 ok=true;   
-                }
-               }
-      else if (!(syntacticItem1.containedItems.isEmpty())&
-              (syntacticItem2.containedItems.isEmpty()))
-               {
-                ok=false;
-                if((syntacticItem1.repetitionNumber==syntacticItem2.repetitionNumber)
-                                    &(syntacticItem1.repetitionNumber!=0))
-                {
-                 ok=true;   
-                }
-               }
-      else if ((syntacticItem1.containedItems.isEmpty())&
-              (syntacticItem2.containedItems.isEmpty())) {ok=true;}
+     } else if ((syntacticItem1.containedItems.isEmpty())&
+              (syntacticItem2.containedItems.isEmpty())) 
+                   { //do nothing
+         
+                   } else {ok=false;}
      
+
+     } 
+
      }
-     else
-         if((syntacticItem1.containedItems==null)&(syntacticItem2.containedItems!=null))
-         {
-             ok = false;
-             if((syntacticItem1.repetitionNumber==syntacticItem2.repetitionNumber)
-                                    &(syntacticItem1.repetitionNumber!=0))
-                {
-                 ok=true;
-                }
-         }
-     else
-         if((syntacticItem1.containedItems!=null)&(syntacticItem2.containedItems==null))
-         {
-             ok = false;
-             if((syntacticItem1.repetitionNumber==syntacticItem2.repetitionNumber)
-                                    &(syntacticItem1.repetitionNumber!=0))
-                {
-                 ok=true;
-                }
-         }
-     else
-         if((syntacticItem1.containedItems==null)&(syntacticItem2.containedItems==null))
-         {
-             ok = true;
-         }
      }
 
      return ok;
    
 }
+
+public void cleanNulls(SyntacticItem syntacticItem)
+{
+   if(syntacticItem!=null)
+   {
+    if (syntacticItem.containedItems!=null)
+    {
+      if(!syntacticItem.containedItems.isEmpty())
+        {
+         List<SyntacticItem> newList=new ArrayList<SyntacticItem>();
+       int max=syntacticItem.containedItems.size();
+
+       for (int i0=0;i0<max;i0++)
+       {
+       
+          SyntacticItem iItem=syntacticItem.containedItems.get(i0);
+          
+          if (iItem.definitionName!=null)
+          {
+           newList.add(iItem);
+          }
+           else
+           {
+            
+           }
+        
+        }
+         syntacticItem.containedItems.clear();
+         syntacticItem.containedItems=null;
+         syntacticItem.containedItems=newList;
+
+        }
+
+
+
+      if(!syntacticItem.containedItems.isEmpty())
+        {
+
+       int max2=syntacticItem.containedItems.size();
+
+       for (int i2=0;i2<max2;i2++)
+       {
+
+          SyntacticItem iItem=syntacticItem.containedItems.get(i2);
+
+          cleanNulls(iItem);
+
+        }
+
+        }
+
+
+
+    }
+   }
+}
+
 void saveBackwardChaining()
 {
    SyntacticItem tree=null;
    tree=crossing0BackwardChaining(demonstrationSource);
-  
+   cleanNulls(tree);
    this.findRepetition(tree, tree);
    //we do the renumbering of the hubs and repetitions
    int initial=numberOfHubs2;
@@ -5123,6 +5492,7 @@ void saveBackwardChaining()
    //END renumbering
    this.findVector_a_p(tree);
    this.displayVector_a_p();
+   lastHub=0;//we reset hub counter
    crossing1ForwardChaining(tree);
 
 }
@@ -5178,6 +5548,110 @@ public boolean justBefore(List<String> x,List<String>y)
  }
  return ok;
 }
+//here we take every hub that is outside of main proof
+//and we put the hub proof to a repetition from the main proof
+
+public void findHubsThatAreOutside(DemonstrationItem item)
+{
+ if(item!=null)
+ {
+  if(item.type==DemonstrationConstants.NEW_STATEMENT)
+  {
+   
+   if(item.markedAsAHub)
+   {
+       
+   if(item.downLink!=null)
+   {
+   DemonstrationItem paste1=item.downLink.get(0);
+   item.downLink.clear();
+   item.markedAsAHub=false;
+   item.repetition=true;
+   this.weFoundARepetitionWithIndexAndWePasteProof=false;
+   this.findRepetitionsWithIndexAndPasteProof(this.demonstrationBeginning,
+                                  item.numberOfOrderInCompressedProof, paste1);
+
+   }
+
+   }
+  }
+
+  if(item.downLink!=null)
+  {
+   if(!item.downLink.isEmpty())
+   {
+    int max=item.downLink.size();
+    for(int i=0;i<max;i++)
+    {
+     this.findHubsThatAreOutside(item.downLink.get(i));
+    }
+   }
+  }
+
+ }
+}
+
+public void findRepetitionsWithIndexAndPasteProof(DemonstrationItem item,
+                                                    int index,
+                                                   DemonstrationItem paste0
+                                                    )
+{
+ if(item!=null)
+ {
+  if(item.type==DemonstrationConstants.NEW_STATEMENT)
+  {
+   if(item.repetition)
+   {
+    if(
+       (item.numberOfOrderInCompressedProof==index)&
+       (!this.weFoundARepetitionWithIndexAndWePasteProof)
+      )
+    {
+     item.markedAsAHub=true;
+     item.repetition=false;
+      if(item.downLink!=null)
+      {
+      item.downLink.clear();
+      
+      }
+       else
+       {
+        item.downLink=new ArrayList<DemonstrationItem>();
+        
+       }
+
+     item.downLink.add(paste0);//we attach  the proof of the outside hub
+     paste0.aboveLink=item;
+     this.weFoundARepetitionWithIndexAndWePasteProof=true;
+
+    }
+   }
+
+  }
+   if(!this.weFoundARepetitionWithIndexAndWePasteProof)
+   {
+  if(item.downLink!=null)
+  {
+   if(!item.downLink.isEmpty())
+   {
+    
+    int max=item.downLink.size();
+    for(int i=0;i<max;i++)
+    {
+     this.findRepetitionsWithIndexAndPasteProof
+                                            (item.downLink.get(i),index,paste0);
+    }
+    
+   }
+  }
+ }
+
+
+ }
+}
+
+//END of operation
+
 public void findHubsAndRepetitions(DemonstrationItem item)
 {
  if(item!=null)
@@ -5289,6 +5763,8 @@ public void findHubWithIndexAndDemarcate(DemonstrationItem item,int index)
 }
 public void recoverNewHubs()
 {
+  DemonstrationItem auxDem=null;
+  List<String> auxPath=null;
  if(this.listOfHubs!=null)
  {
   if(!this.listOfHubs.isEmpty())
@@ -5299,6 +5775,8 @@ public void recoverNewHubs()
     {
       DemonstrationItem iItem=this.listOfHubs.get(i).item;
       List<String> iPath=this.listOfHubs.get(i).path;
+      
+      boolean weFoundMinimumARepetition=false;
     for(int j=0;j<max2;j++)
     {
       DemonstrationItem jItem=this.listOfRepetitions.get(j).item;
@@ -5306,12 +5784,48 @@ public void recoverNewHubs()
 
       if(Source.isEqualXWithY(iItem.items, jItem.items))
       {
+        weFoundMinimumARepetition=true;
        if(this.justBefore(jPath, iPath))
        {
         if(iItem.downLink!=null)
         {
          if(iItem.downLink.size()==1)
          {
+           System.out.println("Swap:");
+
+           //hub
+           int maxk=iItem.items.size();
+           String s1="";
+           for(int k=0;k<maxk;k++)
+           {
+               s1=s1+" "+iItem.items.get(k).constantOrVariableText;
+           }
+           int maxk2=iPath.size();
+           String s2="";
+           for(int k2=0;k2<maxk2;k2++)
+           {
+               s2=s2+" "+iPath.get(k2);
+           }
+           System.out.println("hub no.: "+iItem.numberOfOrderInCompressedProof+
+                   ": "+s1+" path:"+s2);
+
+
+           //repetition
+           maxk=jItem.items.size();
+            s1="";
+           for(int k=0;k<maxk;k++)
+           {
+               s1=s1+" "+jItem.items.get(k).constantOrVariableText;
+           }
+            maxk2=jPath.size();
+            s2="";
+           for(int k2=0;k2<maxk2;k2++)
+           {
+               s2=s2+" "+jPath.get(k2);
+           }
+           System.out.println("rep. no.: "+jItem.numberOfOrderInCompressedProof+
+                   ": "+s1+" path:"+s2);
+
           //we make jItem hub
           DemonstrationItem changeItem=iItem.downLink.get(0);
           jItem.downLink=new ArrayList<DemonstrationItem>();
@@ -5324,12 +5838,20 @@ public void recoverNewHubs()
           iItem.downLink=null;
           iItem.markedAsAHub=false;
           iItem.repetition=true;
-          iItem.numberOfOrderInCompressedProof=jItem.numberOfOrderInCompressedProof;
-          //we change iTem with jItem because jItem is hub now
+          //iItem.numberOfOrderInCompressedProof=jItem.numberOfOrderInCompressedProof;
+          //we swap iTem with jItem because jItem is hub now
+          auxDem=iItem;
+          auxPath=iPath;
           iItem=jItem;
           iPath=jPath;
-         
+          jItem=auxDem;
+          jPath=auxPath;
+          //we update list of hubs and list of repetition
+          this.listOfHubs.get(i).item=iItem;
+          this.listOfHubs.get(i).path=iPath;
 
+          this.listOfRepetitions.get(j).item=jItem;
+          this.listOfRepetitions.get(j).path=jPath;
 
          }
         }
@@ -5337,6 +5859,16 @@ public void recoverNewHubs()
       }
 
     }
+     if(!weFoundMinimumARepetition)
+     {
+       //if the hub has no repetition we deactivate the hub
+        
+        iItem.markedAsAHub=false;
+        iItem.repetition=false;
+        System.out.println("We found a hub without repetition: "+iItem.numberOfOrderInCompressedProof);
+        iItem.numberOfOrderInCompressedProof=0;
+         
+     }
 
     }
       
@@ -5344,6 +5876,7 @@ public void recoverNewHubs()
  }
 
 }
+
 public void crossingRenumberingHubs(DemonstrationItem item)
 {
     if(item!=null)
@@ -5503,23 +6036,60 @@ public void howManyRepetitionsS(int a, SyntacticItem item)
 
     }
 }
+
+public void verifyIfRepetitionIsValid()
+{
+
+ if(this.listOfRepetitions!=null)
+ {
+  if(!this.listOfRepetitions.isEmpty())
+  {
+    int max2=this.listOfRepetitions.size();
+    int max=this.listOfHubs.size();
+    
+    for(int j=0;j<max2;j++)
+    {
+      DemonstrationItem jItem=this.listOfRepetitions.get(j).item;
+      
+
+      boolean weFoundTheHub=false;
+    for(int i=0;i<max;i++)
+    {
+      DemonstrationItem iItem=this.listOfHubs.get(i).item;
+      
+
+      if(Source.isEqualXWithY(jItem.items, iItem.items))
+      {
+        weFoundTheHub=true;
+
+      }
+
+    }
+     if(!weFoundTheHub)
+     {
+       //if the hub doesnt exist we return a error
+       System.out.println("We found a repetition without hub: "
+                                    +jItem.numberOfOrderInCompressedProof);
+        
+
+     }
+
+    }
+
+  }
+ }
+
+}
 boolean backwardChainingSearch(DemonstrationItem demonstrationItem, 
                                                          int level,int position)
 {
  boolean ok=false, finishedSearch=false;int i=0;
  this.selectedDemonstrationItem0=demonstrationItem;
- if(level<=12)
- {
+ if(this.stop){return ok; }
  if(demonstrationItem!=null)
  {
  do
  {
-  if (level>=2)
-  {
-   //if we have applied the same rule three times we pass to the next rule
-    if ((this.depth.get(level-1)==this.depth.get(level-2))
-        &(this.depth.get(level-1)==i)){i++;}
-  }
    //nameI- the name of a a,e,p from the listOfAppliedItems(List of Rules)
    //typeI - the type of a a,e,p from the listOfAppliedItems(List of Rules)
    String nameI="";
@@ -5547,9 +6117,15 @@ boolean backwardChainingSearch(DemonstrationItem demonstrationItem,
         }
         }
   if(i==maxRules) {break;}
-
-  if (this.createNewBranchBackwardChaining(demonstrationItem,nameI ,typeI ))
+  if(this.stop){return ok; }
+  boolean itUnifies=false;
+  if(!(nameI.equals(this.demonstrationSource.name))
+     &(!this.isInLoopRules(nameI))
+     )
   {
+     if(this.createNewBranchBackwardChaining(demonstrationItem,nameI ,typeI ))
+  {
+   itUnifies=true;
    /*here the program enters if demonstrationItem unify with the i rule from
    the List of Rules */
    this.depth.add(level,i);//at level level we apply i rule
@@ -5620,70 +6196,19 @@ boolean backwardChainingSearch(DemonstrationItem demonstrationItem,
      }
      }
    }
-    
-    //here we display the chosen decision
-             javax.swing.JPanel basePanel=null;
-             basePanel=(javax.swing.JPanel)demonstrationTree.getParent();
-
-             if(basePanel!=null)
-             {
-                 //redisplay demonstration
-                 basePanel.remove(demonstrationTree);
-                //restoration
-                 x=xBeforeDemonstration;
-                 y=yBeforeDemonstration;
-                 referenceWidth=baseWidthBeforeDemonstration;
-                 baseHeight=baseHeightBeforeDemonstration;
-                 maximumHeightBase=baseMaximumHeightBeforeDemonstration;
-                 //END restoration
-                 if (demonstrationSource!=null)
-                {
-                   demonstrationTree=
-                           createDemonstrationTree(demonstrationSource);
-                   Dimension d2=demonstrationTree.getPreferredSize();
-                    width1=d2.width;
-                    height1=d2.height;
-
-                      x=xMargin;
-                      y=y+maximumHeightBase+ySpace;
-                      maximumHeightBase=height1;
-
-                  if (y+height1+ySpace>baseHeight)
-                {
-                      int dist=y+height1+ySpace-baseHeight;
-                    baseHeight=baseHeight+dist;
-                }
-
-                 int width=0;
-                 width=referenceWidth;
-                 if (referenceWidth<width1) width=width1;
-
-                  basePanel.setPreferredSize(
-                       new Dimension(width+10*xSpaceRight,baseHeight));
-                  basePanel.add(demonstrationTree);
-                  demonstrationTree.setBounds(x, y, width1,height1);
-
-                  if(height1>maximumHeightBase) maximumHeightBase=height1;
-                   x=x+width1+xSpace;
-                 //redesign base panel
-                 basePanel.revalidate();
-                 basePanel.repaint();
-                 basePanel.repaint();
-             }
-            
-             }
-   //END display
-    /* try
+             
+   if(this.stop){return ok; }
+   /*
+   try
     {
-        Thread.sleep(1000);
+        Thread.sleep(5000);
     }
     catch(InterruptedException ex)
     {
         Thread.currentThread().interrupt();
     }
-
-     * 
-     */
+   */
+    
    if (generatedStatements.isEmpty())
    {
     finishedSearch=true;ok=true;
@@ -5693,21 +6218,42 @@ boolean backwardChainingSearch(DemonstrationItem demonstrationItem,
      int max=generatedStatements.size();
      boolean allAreProved=true;
      BitSet bs=new BitSet(max);
-     for(int i0=0;i0<max;i0++)
+     //here we want to pass only one time
+     for(int i0=0;i0<1;i0++)
      {
        allAreProved=true;
        for(int j0=0;j0<max;j0++)
        {
-        /*we try to prove the j0 statement from the generatedStatements
+        /*here we search in the generatedStatements the statement
+          with the biggest number of clues
+          (constants or variables that are not new)
+         *
+         */
+         if(this.stop){return ok; }
+         int index=-1;//the index were is the statement with biggest number of clues
+         int maximum=-1;//the maximum number of clues
+         for (int k0=0;k0<max;k0++)
+         {
+          if (!(bs.get(k0)))//if is not demonstated
+          {
+           int numberk0=this.numberOfClues(generatedStatements.get(k0));
+            if (maximum<numberk0)
+            {
+             maximum=numberk0;
+             index=k0;
+            }
+          }
+         }
+
+        /*we try to prove the (index) statement from the generatedStatements
          * and we mark if is a succes inf  bs array
          */
         boolean boolValue=false;
-        //if bs at position j0 is not true we demonstrate (again if necesary)
-        if (!(bs.get(j0)))
+        if (index>-1)
         {
         boolValue=backwardChainingSearch
-                                     (generatedStatements.get(j0),level+1,j0);
-        bs.set(j0, boolValue);
+                                (generatedStatements.get(index),level+1,index);
+        bs.set(index, boolValue);
         }
         
         if(!boolValue){allAreProved=false;}
@@ -5718,6 +6264,7 @@ boolean backwardChainingSearch(DemonstrationItem demonstrationItem,
      /*if it's not possible to prove all the generatedStatements
       we are moving to the next rules from the List of Rules
       */
+     /*
      if(!allAreProved) 
      {
      //we delete the proof on demonstrationItem and we pass to the next rule
@@ -5725,16 +6272,401 @@ boolean backwardChainingSearch(DemonstrationItem demonstrationItem,
      this.updateStatementsAfterDestruction(demonstrationSource);
      i++;
      }
+     */
 
    }
 
   }
- else i++;
+  }
+  if(!itUnifies){ i++;}
  if (i==maxRules) {break;}//we exit from the main loop
+ if(this.stop){return ok; }
  }while(!finishedSearch);
  }
- }
+ 
  return ok;
+
+}
+
+public boolean isALoopRule(String nameI,byte typeI)
+{
+ //here we test if an axiom or a theorem whould generate a loop in the proof
+
+ //nameI- the name of a a,e,p from the listOfAppliedItems(List of Rules)
+ //typeI - the type of a a,e,p from the listOfAppliedItems(List of Rules)
+ boolean ok=false;
+ DemonstrationItem demonstrationItem1=null,demonstrationItem2=null,lastItem=null;
+
+//here we want to obtain the assertion of a the axiom or theorem
+Axiom xAxiom=null;
+Theorem xTheorem=null;
+if (S.axioms.containsKey(nameI))
+{
+if (S.availableAxioms.contains(nameI))
+{
+
+xAxiom=(Axiom)S.axioms.get(nameI);
+}
+else   {errorNewLine("The axiom is not visible in this part of the file");}
+} else
+        if (S.theorems.containsKey(nameI))
+        {
+        if (S.availableTheorems.contains(nameI))
+        {
+
+        xTheorem=(Theorem)S.theorems.get(nameI);
+        }
+        else {errorNewLine("The theorem is not visible in this part of the file");}
+        }
+ 
+if (xAxiom!=null)
+{
+ //here we copy the items from the axiom
+ demonstrationItem1= new DemonstrationItem();
+ demonstrationItem1.type=DemonstrationConstants.NEW_STATEMENT;
+ demonstrationItem1.items=Source.copyTheListOfConstantAndVariable(xAxiom.items);
+}
+ else if (xTheorem!=null)
+ {
+ //here we copy the items from the theorem
+ demonstrationItem1= new DemonstrationItem();
+ demonstrationItem1.type=DemonstrationConstants.NEW_STATEMENT;
+ demonstrationItem1.items=
+                       Source.copyTheListOfConstantAndVariable(xTheorem.items);
+ }
+
+//the first level of demonstration tree
+ this.selectedDemonstrationItem0=demonstrationItem1;
+
+ if(demonstrationItem1!=null)
+ {
+   
+ 
+     if(this.createNewBranchBackwardChaining(demonstrationItem1,nameI ,typeI ))
+  {
+  
+   
+   /* here we discover the newly generated statements(if exists) obtained
+    by applying the nameI rule and we put them in a collection  */
+   List<DemonstrationItem> generatedStatements=new ArrayList<DemonstrationItem>();
+
+   if ((demonstrationItem1.type==DemonstrationConstants.TARGET)
+       |(demonstrationItem1.type==DemonstrationConstants.BASE)
+       |(demonstrationItem1.type==DemonstrationConstants.NEW_STATEMENT))
+   {
+     DemonstrationItem appliedTheoremOrAxiom=null;
+     if (demonstrationItem1.downLink!=null)
+     {
+     if (!(demonstrationItem1.downLink.isEmpty()))
+     {
+      appliedTheoremOrAxiom=demonstrationItem1.downLink.get(0);
+      if(appliedTheoremOrAxiom!=null)
+      {
+       if((appliedTheoremOrAxiom.type==DemonstrationConstants.AXIOM_FROM_COMPOSED_AXIOM)
+         |(appliedTheoremOrAxiom.type==DemonstrationConstants.THEOREM_FROM_COMPOSED_THEOREM)
+         )
+          {
+           if(appliedTheoremOrAxiom.downLink!=null)
+            {
+            if (!(appliedTheoremOrAxiom.downLink.isEmpty()))
+               {
+                int max0=appliedTheoremOrAxiom.downLink.size();
+
+                for(int c1=0;c1<max0;c1++)
+                 {
+                  DemonstrationItem generatedStatement=null;
+                  DemonstrationItem hypothesis=null;
+                  hypothesis=appliedTheoremOrAxiom.downLink.get(c1);
+
+                  if((hypothesis.type==DemonstrationConstants.HYPOTHESIS_FROM_COMPOSED_AXIOM)
+                     |(hypothesis.type==DemonstrationConstants.HYPOTHESIS_FROM_COMPOSED_THEOREM)
+                    )
+                   {
+                    if(hypothesis.downLink!=null)
+                     {
+                      if(!(hypothesis.downLink.isEmpty()))
+                      {
+                       generatedStatement=hypothesis.downLink.get(0);
+                       //if the found demonstration item is a new statement
+                       //we add to the list generatedStatements
+                       if(generatedStatement.type==DemonstrationConstants.NEW_STATEMENT)
+                         {
+                           generatedStatements.add(c1,generatedStatement);
+                         }
+
+                      }
+
+                     }
+                   }
+
+
+
+                 }
+
+               }
+            }
+          }
+      }
+
+     }
+     }
+   }
+   int max=generatedStatements.size();
+   if (max==1)
+   {
+     //here we catch the genereated item
+     demonstrationItem2=generatedStatements.get(0);
+   }
+
+   
+ }
+ }
+ //the second level of demonstration tree
+ this.selectedDemonstrationItem0=demonstrationItem2;
+
+ if(demonstrationItem2!=null)
+ {
+
+
+     if(this.createNewBranchBackwardChaining(demonstrationItem2,nameI ,typeI ))
+  {
+
+
+   /* here we discover the newly generated statements(if exists) obtained
+    by applying the nameI rule and we put them in a collection  */
+   List<DemonstrationItem> generatedStatements=new ArrayList<DemonstrationItem>();
+
+   if ((demonstrationItem2.type==DemonstrationConstants.TARGET)
+       |(demonstrationItem2.type==DemonstrationConstants.BASE)
+       |(demonstrationItem2.type==DemonstrationConstants.NEW_STATEMENT))
+   {
+     DemonstrationItem appliedTheoremOrAxiom=null;
+     if (demonstrationItem2.downLink!=null)
+     {
+     if (!(demonstrationItem2.downLink.isEmpty()))
+     {
+      appliedTheoremOrAxiom=demonstrationItem2.downLink.get(0);
+      if(appliedTheoremOrAxiom!=null)
+      {
+       if((appliedTheoremOrAxiom.type==DemonstrationConstants.AXIOM_FROM_COMPOSED_AXIOM)
+         |(appliedTheoremOrAxiom.type==DemonstrationConstants.THEOREM_FROM_COMPOSED_THEOREM)
+         )
+          {
+           if(appliedTheoremOrAxiom.downLink!=null)
+            {
+            if (!(appliedTheoremOrAxiom.downLink.isEmpty()))
+               {
+                int max0=appliedTheoremOrAxiom.downLink.size();
+
+                for(int c1=0;c1<max0;c1++)
+                 {
+                  DemonstrationItem generatedStatement=null;
+                  DemonstrationItem hypothesis=null;
+                  hypothesis=appliedTheoremOrAxiom.downLink.get(c1);
+
+                  if((hypothesis.type==DemonstrationConstants.HYPOTHESIS_FROM_COMPOSED_AXIOM)
+                     |(hypothesis.type==DemonstrationConstants.HYPOTHESIS_FROM_COMPOSED_THEOREM)
+                    )
+                   {
+                    if(hypothesis.downLink!=null)
+                     {
+                      if(!(hypothesis.downLink.isEmpty()))
+                      {
+                       generatedStatement=hypothesis.downLink.get(0);
+                       //if the found demonstration item is a new statement
+                       //we add to the list generatedStatements
+                       if(generatedStatement.type==DemonstrationConstants.NEW_STATEMENT)
+                         {
+                           generatedStatements.add(c1,generatedStatement);
+                         }
+
+                      }
+
+                     }
+                   }
+
+
+
+                 }
+
+               }
+            }
+          }
+      }
+
+     }
+     }
+   }
+   int max=generatedStatements.size();
+   if (max==1)
+   {
+     //here we catch the genereated item
+     lastItem=generatedStatements.get(0);
+   }
+
+
+ }
+ }
+ //we check if the statement where we start is identical with last one
+ if (demonstrationItem1!=null)
+ {
+ if (lastItem!=null)
+ {
+ ok=Source.isEqualXWithY(demonstrationItem1.items, lastItem.items);
+ }
+ }
+
+ return ok;
+}
+public boolean isInLoopRules(String name)
+{
+ boolean ok=false;
+int max=0;
+max=this.loopRules.size();
+for(int i=0;i<max;i++)
+{
+ String loopi=this.loopRules.get(i);
+ 
+ if (loopi.equals(name))
+ {
+   ok=true;
+   break;
+ }
+}
+
+return ok;
+}
+//here we search the items of demonstation item for constants
+//and variables that are not new (the clues)
+public int numberOfClues(DemonstrationItem d)
+{ int number=0;//the number of clues in a statement
+  int max=d.items.size();
+  for(int i=0;i<max;i++)
+  {
+    ConstantAndVariable cvi=d.items.get(i);
+    if (cvi.constantOrVariable==1)
+    {
+      number++;
+    }
+    else if ((cvi.constantOrVariable==2)&
+        (!(Source.stringStartsWith(cvi.constantOrVariableText, "$v"))))
+    {
+      number++;
+    }
+  }
+  return number;
+}
+public void refreshTree()
+{
+ //here we repaint the proof tree
+     
+     javax.swing.JPanel basePanel=null;
+     basePanel=(javax.swing.JPanel)demonstrationTree.getParent();
+
+     if(basePanel!=null)
+     {
+         //redisplay demonstration
+         basePanel.remove(demonstrationTree);
+         //redesign base panel
+         basePanel.revalidate();
+         basePanel.repaint();
+         basePanel.repaint();
+        //restoration
+         x=xBeforeDemonstration;
+         y=yBeforeDemonstration;
+         referenceWidth=baseWidthBeforeDemonstration;
+         baseHeight=baseHeightBeforeDemonstration;
+         maximumHeightBase=baseMaximumHeightBeforeDemonstration;
+         //END restoration
+         if (demonstrationSource!=null)
+        {
+           demonstrationTree=
+                   createDemonstrationTree(demonstrationSource);
+           Dimension d2=demonstrationTree.getPreferredSize();
+            width1=d2.width;
+            height1=d2.height;
+
+              x=xMargin;
+              y=y+maximumHeightBase+ySpace;
+              maximumHeightBase=height1;
+
+          if (y+height1+ySpace>baseHeight)
+        {
+              int dist=y+height1+ySpace-baseHeight;
+            baseHeight=baseHeight+dist;
+        }
+
+         int width=0;
+         width=referenceWidth;
+         if (referenceWidth<width1) width=width1;
+
+          basePanel.setPreferredSize(
+               new Dimension(width+10*xSpaceRight,baseHeight));
+          basePanel.add(demonstrationTree);
+          demonstrationTree.setBounds(x, y, width1,height1);
+
+          if(height1>maximumHeightBase) maximumHeightBase=height1;
+           x=x+width1+xSpace;
+         //redesign base panel
+         basePanel.revalidate();
+         basePanel.repaint();
+         basePanel.repaint();
+
+     }
+
+     }
+            
+   //END display
+   
+   try
+    {
+        Thread.sleep(5000);
+    }
+    catch(InterruptedException ex)
+    {
+        Thread.currentThread().interrupt();
+    }
+      
+    
+}
+public void proofFindingFunction()
+{
+ProofFindingThread f1=new ProofFindingThread(this);
+RefreshThread f2=new RefreshThread(this);
+f1.start();
+f2.start();
+}
+public void stopFunction()
+{
+  this.stop=true;//we stop the automated search
+}
+public void displaySyntax(SyntacticItem syn)
+{
+
+ if (syn!=null)
+ {
+   System.out.print(" { ");
+     if (syn.containedItems!=null)
+     {
+       if(!syn.containedItems.isEmpty())
+       {
+           int max=syn.containedItems.size();
+           for(int i=0;i<max;i++)
+           {
+             displaySyntax(syn.containedItems.get(i));
+           }
+
+       }
+     }
+
+  System.out.print(" ["+syn.hub
+          +"|"+syn.repetition
+          +"|"+syn.repetitionNumber
+          +":"+syn.definitionName+"] } ");
+
+
+ }
+
 
 }
 

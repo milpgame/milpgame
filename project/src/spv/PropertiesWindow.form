@@ -41,6 +41,7 @@
   <SubComponents>
     <Container class="javax.swing.JScrollPane" name="scrollPane">
       <Properties>
+        <Property name="horizontalScrollBarPolicy" type="int" value="32"/>
         <Property name="autoscrolls" type="boolean" value="true"/>
         <Property name="name" type="java.lang.String" value="scrollPane" noResource="true"/>
       </Properties>
