@@ -46,6 +46,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import org.jdesktop.application.Application;
 import java.util.Collections;
+import javax.swing.text.StyledDocument;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.BadLocationException;
+import java.awt.Color;
+import java.util.StringTokenizer;
+import java.util.Iterator;
+import java.awt.Cursor;
 
 /**
  * The application's main frame.
@@ -155,7 +163,21 @@ public class MainWindow extends FrameView {
         addExistingStatementButton = new javax.swing.JButton();
         propertiesButton = new javax.swing.JButton();
         syntaxButton = new javax.swing.JButton();
-        fillButton = new javax.swing.JButton();
+        markTargetButton = new javax.swing.JButton();
+        nullTargetButton = new javax.swing.JButton();
+        textVersionButton = new javax.swing.JButton();
+        fitPanel = new javax.swing.JPanel();
+        SearchFitButton = new javax.swing.JButton();
+        startStatementFitLabel = new javax.swing.JLabel();
+        fitLabel1 = new javax.swing.JLabel();
+        numberOfHypFitText = new javax.swing.JTextField();
+        fitLabel2 = new javax.swing.JLabel();
+        isCorrectFitLabel = new javax.swing.JLabel();
+        checkFitButton = new javax.swing.JButton();
+        targetStatementFitPane = new javax.swing.JScrollPane();
+        targetStatementFitPane2 = new javax.swing.JTextPane();
+        InsertDirectlyButton = new javax.swing.JButton();
+        targetLabel = new javax.swing.JLabel();
         statePanel = new javax.swing.JPanel();
         javax.swing.JSeparator statePillar = new javax.swing.JSeparator();
         stateMessageLabel = new javax.swing.JLabel();
@@ -430,19 +452,142 @@ public class MainWindow extends FrameView {
         });
         toolsBar.add(syntaxButton);
 
-        fillButton.setForeground(resourceMap.getColor("fillButton.foreground")); // NOI18N
-        fillButton.setText(resourceMap.getString("fillButton.text")); // NOI18N
-        fillButton.setEnabled(false);
-        fillButton.setFocusable(false);
-        fillButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        fillButton.setName("fillButton"); // NOI18N
-        fillButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        fillButton.addActionListener(new java.awt.event.ActionListener() {
+        markTargetButton.setForeground(resourceMap.getColor("markTargetButton.foreground")); // NOI18N
+        markTargetButton.setText(resourceMap.getString("markTargetButton.text")); // NOI18N
+        markTargetButton.setName("markTargetButton"); // NOI18N
+        markTargetButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                fillButtonActionPerformed(evt);
+                markTargetButtonActionPerformed(evt);
             }
         });
-        toolsBar.add(fillButton);
+        toolsBar.add(markTargetButton);
+
+        nullTargetButton.setForeground(resourceMap.getColor("nullTargetButton.foreground")); // NOI18N
+        nullTargetButton.setText(resourceMap.getString("nullTargetButton.text")); // NOI18N
+        nullTargetButton.setFocusable(false);
+        nullTargetButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        nullTargetButton.setName("nullTargetButton"); // NOI18N
+        nullTargetButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        nullTargetButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nullTargetButtonActionPerformed(evt);
+            }
+        });
+        toolsBar.add(nullTargetButton);
+
+        textVersionButton.setForeground(resourceMap.getColor("textVersionButton.foreground")); // NOI18N
+        textVersionButton.setText(resourceMap.getString("textVersionButton.text")); // NOI18N
+        textVersionButton.setName("textVersionButton"); // NOI18N
+        textVersionButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                textVersionButtonActionPerformed(evt);
+            }
+        });
+        toolsBar.add(textVersionButton);
+
+        fitPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, resourceMap.getString("fitPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 11), resourceMap.getColor("fitPanel.border.titleColor"))); // NOI18N
+        fitPanel.setForeground(resourceMap.getColor("fitPanel.foreground")); // NOI18N
+        fitPanel.setName("fitPanel"); // NOI18N
+
+        SearchFitButton.setForeground(resourceMap.getColor("SearchFitButton.foreground")); // NOI18N
+        SearchFitButton.setText(resourceMap.getString("SearchFitButton.text")); // NOI18N
+        SearchFitButton.setName("SearchFitButton"); // NOI18N
+        SearchFitButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SearchFitButtonActionPerformed(evt);
+            }
+        });
+
+        startStatementFitLabel.setForeground(resourceMap.getColor("startStatementFitLabel.foreground")); // NOI18N
+        startStatementFitLabel.setText(resourceMap.getString("startStatementFitLabel.text")); // NOI18N
+        startStatementFitLabel.setName("startStatementFitLabel"); // NOI18N
+
+        fitLabel1.setForeground(resourceMap.getColor("fitLabel1.foreground")); // NOI18N
+        fitLabel1.setText(resourceMap.getString("fitLabel1.text")); // NOI18N
+        fitLabel1.setName("fitLabel1"); // NOI18N
+
+        numberOfHypFitText.setText(resourceMap.getString("numberOfHypFitText.text")); // NOI18N
+        numberOfHypFitText.setName("numberOfHypFitText"); // NOI18N
+
+        fitLabel2.setForeground(resourceMap.getColor("fitLabel2.foreground")); // NOI18N
+        fitLabel2.setText(resourceMap.getString("fitLabel2.text")); // NOI18N
+        fitLabel2.setName("fitLabel2"); // NOI18N
+
+        isCorrectFitLabel.setForeground(new java.awt.Color(0, 51, 255));
+        isCorrectFitLabel.setText(resourceMap.getString("isCorrectFitLabel.text")); // NOI18N
+        isCorrectFitLabel.setName("isCorrectFitLabel"); // NOI18N
+
+        checkFitButton.setForeground(resourceMap.getColor("checkFitButton.foreground")); // NOI18N
+        checkFitButton.setText(resourceMap.getString("checkFitButton.text")); // NOI18N
+        checkFitButton.setName("checkFitButton"); // NOI18N
+        checkFitButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                checkFitButtonActionPerformed(evt);
+            }
+        });
+
+        targetStatementFitPane.setName("targetStatementFitPane"); // NOI18N
+
+        targetStatementFitPane2.setName("targetStatementFitPane2"); // NOI18N
+        targetStatementFitPane.setViewportView(targetStatementFitPane2);
+
+        InsertDirectlyButton.setForeground(resourceMap.getColor("InsertDirectlyButton.foreground")); // NOI18N
+        InsertDirectlyButton.setText(resourceMap.getString("InsertDirectlyButton.text")); // NOI18N
+        InsertDirectlyButton.setName("InsertDirectlyButton"); // NOI18N
+        InsertDirectlyButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                InsertDirectlyButtonActionPerformed(evt);
+            }
+        });
+
+        targetLabel.setForeground(resourceMap.getColor("targetLabel.foreground")); // NOI18N
+        targetLabel.setText(resourceMap.getString("targetLabel.text")); // NOI18N
+        targetLabel.setName("targetLabel"); // NOI18N
+
+        javax.swing.GroupLayout fitPanelLayout = new javax.swing.GroupLayout(fitPanel);
+        fitPanel.setLayout(fitPanelLayout);
+        fitPanelLayout.setHorizontalGroup(
+            fitPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(fitPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(fitPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(targetStatementFitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 1182, Short.MAX_VALUE)
+                    .addGroup(fitPanelLayout.createSequentialGroup()
+                        .addComponent(startStatementFitLabel)
+                        .addGap(38, 38, 38)
+                        .addComponent(fitLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(numberOfHypFitText, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(fitLabel2)
+                        .addGap(84, 84, 84)
+                        .addComponent(isCorrectFitLabel)
+                        .addGap(95, 95, 95)
+                        .addComponent(checkFitButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(SearchFitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(InsertDirectlyButton, javax.swing.GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE))
+                    .addComponent(targetLabel))
+                .addContainerGap())
+        );
+        fitPanelLayout.setVerticalGroup(
+            fitPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, fitPanelLayout.createSequentialGroup()
+                .addComponent(targetStatementFitPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 15, Short.MAX_VALUE)
+                .addGroup(fitPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(startStatementFitLabel)
+                    .addComponent(fitLabel1)
+                    .addComponent(numberOfHypFitText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(fitLabel2)
+                    .addComponent(isCorrectFitLabel)
+                    .addComponent(checkFitButton)
+                    .addComponent(SearchFitButton)
+                    .addComponent(InsertDirectlyButton))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(targetLabel))
+        );
 
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
@@ -450,10 +595,13 @@ public class MainWindow extends FrameView {
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(menuTab, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(32, 32, 32)
-                .addComponent(toolsBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(250, Short.MAX_VALUE))
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(fitPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addComponent(menuTab, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(32, 32, 32)
+                        .addComponent(toolsBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
             .addComponent(filesTab, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 1234, Short.MAX_VALUE)
         );
         mainPanelLayout.setVerticalGroup(
@@ -464,7 +612,9 @@ public class MainWindow extends FrameView {
                     .addComponent(menuTab, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(toolsBar, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(filesTab, javax.swing.GroupLayout.DEFAULT_SIZE, 550, Short.MAX_VALUE))
+                .addComponent(fitPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(filesTab, javax.swing.GroupLayout.DEFAULT_SIZE, 437, Short.MAX_VALUE))
         );
 
         filesTab.getAccessibleContext().setAccessibleName(resourceMap.getString("Tabul1.AccessibleContext.accessibleName")); // NOI18N
@@ -536,8 +686,6 @@ public class MainWindow extends FrameView {
         
         if (this.currentDemonstrationEditor!=null)
          {
-            if (this.currentDemonstrationEditor.selectedDemonstrationItem0!=null)
-            {
                 this.currentDemonstrationEditor.createBranchAndUpdate();
                 
 
@@ -570,7 +718,7 @@ public class MainWindow extends FrameView {
 
 
 
-            }
+            
         }
 
     }//GEN-LAST:event_branchCreationButtonActionPerformed
@@ -781,184 +929,616 @@ public class MainWindow extends FrameView {
      }
     }//GEN-LAST:event_openButtonActionPerformed
 
-    private void fillButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fillButtonActionPerformed
+    private void checkFitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkFitButtonActionPerformed
+      Application0 a=(Application0)Application.getInstance();
+     StyledDocument doc=this.targetStatementFitPane2.getStyledDocument();
+     Style style=this.targetStatementFitPane2.addStyle("red style", null);
+     StyleConstants.setForeground(style, Color.red);
 
-     if (this.currentDemonstrationEditor!=null)
-         {
-            if (this.currentDemonstrationEditor.baseTheorem.hypotheses!=null)
-            {
-              if (!(this.currentDemonstrationEditor.baseTheorem.
-                                                         hypotheses.isEmpty()))
-            {
-             //we add to the List of Rules hypotheses if exist
-              int max=this.currentDemonstrationEditor.baseTheorem.
-                                                             hypotheses.size();
-              for(int i=0;i<max;i++)
-              {
-              Hypothesis hypi=this.currentDemonstrationEditor.baseTheorem.
-                                                             hypotheses.get(i);
-              AppliedItem aii=new AppliedItem();
-              aii.name=hypi.name;
-              aii.type=DemonstrationConstants.PROPER_HYPOTHESIS;
-              aii.priority=-(hypi.items.size())-20000;
-              this.listOfAppliedItems.add(aii);
+     String inputText=this.targetStatementFitPane2.getText();
+     StringTokenizer st=new StringTokenizer(inputText," ");
+     this.targetStatementFitPane2.setText("");//we clear the text
 
-              }
-            }
-            }
-            //we clear the list of loop rules
-            this.currentDemonstrationEditor.loopRules.clear();
-            //we add to the List of Rules axioms
-            if (this.currentDemonstrationEditor.S.axioms!=null)
-            {
-             java.util.Iterator<Object>
-               it=this.currentDemonstrationEditor.S.axioms.values().iterator();
-             while(it.hasNext())
-             {
-              Axiom axi=(Axiom)it.next();
-              AppliedItem aii=new AppliedItem();
-              aii.name=axi.name;
-              if(axi.type==1)
-              {
-              aii.type=DemonstrationConstants.SIMPLE_AXIOM;
-              aii.priority=-(axi.items.size());
-              }
-              else if(axi.type==2)
-              {
-              
-               if(axi.hypotheses.size()==1)
+     List<ConstantAndVariable>  importedFormula = new
+                                              ArrayList<ConstantAndVariable>();
+     boolean correctWords=true;
+      int i0=-1;
+     while(st.hasMoreTokens())
+     {
+      String si=st.nextToken();i0++;
+
+      boolean stringFound=false;
+
+               Iterator<String> it1=a.frame0.source1.constants.iterator();
+               while(it1.hasNext())
                {
-                if (this.currentDemonstrationEditor.isALoopRule(axi.name,(byte)0))
+                String constI=it1.next();
+                if(constI.equals(si))
                 {
-                this.currentDemonstrationEditor.loopRules.add(axi.name);
-                 //System.out.println(axi.name+" is a loop rule(axiom).");
+                 ConstantAndVariable c=new ConstantAndVariable();
+                 c.constantOrVariable=1;
+                 c.constantOrVariableText=si;
+                 importedFormula.add(c);
+                 stringFound=true;
+                 break;
                 }
-               }
-                
-               aii.type=DemonstrationConstants.AXIOM_FROM_COMPOSED_AXIOM;
-               
-               int nomber=axi.hypotheses.size();
-               int sum=0;
-               for(int i=0;i<nomber;i++)
-               {
-                sum=sum+axi.hypotheses.get(i).items.size();
-               }
-               aii.priority=(float)(-axi.items.size())+(float)((float)sum/(float)(axi.items.size()));
-              }
+                }
 
-              this.listOfAppliedItems.add(aii);
-             }
-
-            }
-         //we add to the List of Rules theorems
-            if (this.currentDemonstrationEditor.S.theorems!=null)
-            {
-             java.util.Iterator<Object>
-               it=this.currentDemonstrationEditor.S.theorems.values().iterator();
-             while(it.hasNext())
-             {
-              Theorem thi=(Theorem)it.next();
-              AppliedItem aii=new AppliedItem();
-              aii.name=thi.name;
-              if(thi.type==1)
-              {
-              aii.type=DemonstrationConstants.SIMPLE_THEOREM;
-              aii.priority=-(thi.items.size());
-              }
-              else if(thi.type==2)
-              {
-               
-               if(thi.hypotheses.size()==1)
+               Iterator<String> it2=a.frame0.source1.variables.iterator();
+               while(it2.hasNext())
                {
-                if (this.currentDemonstrationEditor.isALoopRule(thi.name,(byte)0))
+                String varI=it2.next();
+                if(varI.equals(si))
                 {
-                 this.currentDemonstrationEditor.loopRules.add(thi.name);
-                 //System.out.println(thi.name+" is a loop rule(theorem).");
+                 ConstantAndVariable v=new ConstantAndVariable();
+                 v.constantOrVariable=2;
+                 v.constantOrVariableText=si;
+                 if (a.frame0!=null)
+                  {
+                  if (a.frame0.source1!=null)
+                     {
+                   if (a.frame0.source1.variableAndType!=null)
+                   {
+
+                     v.variableClass=a.frame0.source1.variableAndType.
+                                                  get(v.constantOrVariableText);
+                   }
+                   }
+                   }
+                 importedFormula.add(v);
+                 stringFound=true;
+                 break;
                 }
-               }
-               
-               aii.type=DemonstrationConstants.THEOREM_FROM_COMPOSED_THEOREM;
-               int nomber=thi.hypotheses.size();
-               int sum=0;
-               for(int i=0;i<nomber;i++)
-               {
-                sum=sum+thi.hypotheses.get(i).items.size();
-               }
-               aii.priority=(float)(-thi.items.size())+(float)((float)sum/(float)(thi.items.size()));
-              }
+                }
 
-              this.listOfAppliedItems.add(aii);
-             }
-
-            }
-         //here we sort the LR by priority
-          boolean ok=true;
-          int max0=this.listOfAppliedItems.size();
-          do
-          {
-           ok=true;
-           for(int i=0;i<max0-1;i++)
+     if(!stringFound)
+     {
+         try
            {
-            float priorityI=this.listOfAppliedItems.get(i).priority;
-            float priorityIp1=this.listOfAppliedItems.get(i+1).priority;
-            if (priorityI>priorityIp1)
-            {
-             ok=false;
-             String auxname=this.listOfAppliedItems.get(i).name;
-             float auxpriority=this.listOfAppliedItems.get(i).priority;
-             int auxtype=this.listOfAppliedItems.get(i).type;
+            doc.insertString(doc.getLength(), si, style);
+            doc.insertString(doc.getLength(), " ", null);
 
-             this.listOfAppliedItems.get(i).name=
-                                          this.listOfAppliedItems.get(i+1).name;
-             this.listOfAppliedItems.get(i).priority=
-                                      this.listOfAppliedItems.get(i+1).priority;
-             this.listOfAppliedItems.get(i).type=
-                                          this.listOfAppliedItems.get(i+1).type;
+           } catch(BadLocationException e){}
 
-             this.listOfAppliedItems.get(i+1).name=auxname;
-             this.listOfAppliedItems.get(i+1).priority=auxpriority;
-             this.listOfAppliedItems.get(i+1).type=auxtype;
-            }
+         correctWords=false;
+     }
+     else
+     {
+      if((!si.equals("|-"))&(i0==0))
+       {
+        try
+           {
+            doc.insertString(doc.getLength(), si, style);
+            doc.insertString(doc.getLength(), " ", null);
 
-           }
+           } catch(BadLocationException e){}
+        correctWords=false;
+       }
+       else
+       {
+        try
+           {
+            doc.insertString(doc.getLength(), si, null);
+            doc.insertString(doc.getLength(), " ", null);
+
+           } catch(BadLocationException e){}
+        }
+
+     }
+
+
+     }
+     if(correctWords)
+     {
+       
+       this.targetFitStatement=importedFormula;
+      
+     //we verify syntactic correctness
+
+      if (targetFitStatement!=null)
+     {
+     if (!targetFitStatement.isEmpty())
+     {
+
+       SyntacticItem syntacticTree=new SyntacticItem();
+      boolean correct=a.frame0.source1.verifySyntacticType
+                                            (
+                                            targetFitStatement,
+                                            "wff",
+                                            1,
+                                            true,
+                                            syntacticTree
+                                            );
+
+      if (correct)
+      {
+         this.isCorrectFitLabel.setText("Entered formula is:correct!");
+      }
+      else
+      {
+         this.isCorrectFitLabel.setText("Entered formula is:incorrect!");
+      }
+
+      }
+      }
+     }
+     else 
+     {
+        this.isCorrectFitLabel.setText("Entered formula is:incorrect!");
+     }
+
+
+
+    }//GEN-LAST:event_checkFitButtonActionPerformed
+
+    private void SearchFitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SearchFitButtonActionPerformed
+
+        if (this.currentDemonstrationEditor!=null)
+         {
+            if (this.currentDemonstrationEditor.demonstrationStrategyType==1)
+                {
+
+                  Application0 a=(Application0)Application.getInstance();
+                     StyledDocument doc=this.targetStatementFitPane2.getStyledDocument();
+                     Style style=this.targetStatementFitPane2.addStyle("red style", null);
+                     StyleConstants.setForeground(style, Color.red);
+
+                     String inputText=this.targetStatementFitPane2.getText();
+                     StringTokenizer st=new StringTokenizer(inputText," ");
+                     this.targetStatementFitPane2.setText("");//we clear the text
+
+                     List<ConstantAndVariable>  importedFormula = new
+                                                              ArrayList<ConstantAndVariable>();
+                     boolean correctWords=true,correct=true;
+                      int i0=-1;
+                     while(st.hasMoreTokens())
+                     {
+                      String si=st.nextToken();i0++;
+
+                      boolean stringFound=false;
+
+                               Iterator<String> it1=a.frame0.source1.constants.iterator();
+                               while(it1.hasNext())
+                               {
+                                String constI=it1.next();
+                                if(constI.equals(si))
+                                {
+                                 ConstantAndVariable c=new ConstantAndVariable();
+                                 c.constantOrVariable=1;
+                                 c.constantOrVariableText=si;
+                                 importedFormula.add(c);
+                                 stringFound=true;
+                                 break;
+                                }
+                                }
+
+                               Iterator<String> it2=a.frame0.source1.variables.iterator();
+                               while(it2.hasNext())
+                               {
+                                String varI=it2.next();
+                                if(varI.equals(si))
+                                {
+                                 ConstantAndVariable v=new ConstantAndVariable();
+                                 v.constantOrVariable=2;
+                                 v.constantOrVariableText=si;
+                                 if (a.frame0!=null)
+                                  {
+                                  if (a.frame0.source1!=null)
+                                     {
+                                   if (a.frame0.source1.variableAndType!=null)
+                                   {
+
+                                     v.variableClass=a.frame0.source1.variableAndType.
+                                                                  get(v.constantOrVariableText);
+                                   }
+                                   }
+                                   }
+                                 importedFormula.add(v);
+                                 stringFound=true;
+                                 break;
+                                }
+                                }
+
+                     if(!stringFound)
+                     {
+                         try
+                           {
+                            doc.insertString(doc.getLength(), si, style);
+                            doc.insertString(doc.getLength(), " ", null);
+
+                           } catch(BadLocationException e){}
+
+                         correctWords=false;
+                     }
+                     else
+                     {
+                      if((!si.equals("|-"))&(i0==0))
+                       {
+                        try
+                           {
+                            doc.insertString(doc.getLength(), si, style);
+                            doc.insertString(doc.getLength(), " ", null);
+
+                           } catch(BadLocationException e){}
+                        correctWords=false;
+                       }
+                       else
+                       {
+                        try
+                           {
+                            doc.insertString(doc.getLength(), si, null);
+                            doc.insertString(doc.getLength(), " ", null);
+
+                           } catch(BadLocationException e){}
+                        }
+
+                     }
+
+
+                     }
+                     if(correctWords)
+                     {
+
+                       this.targetFitStatement=importedFormula;
+
+                     //we verify syntactic correctness
+
+                      if (targetFitStatement!=null)
+                     {
+                     if (!targetFitStatement.isEmpty())
+                     {
+
+                       SyntacticItem syntacticTree=new SyntacticItem();
+                       correct=a.frame0.source1.verifySyntacticType
+                                                            (
+                                                            targetFitStatement,
+                                                            "wff",
+                                                            1,
+                                                            true,
+                                                            syntacticTree
+                                                            );
+
+                      if (correct)
+                      {
+                         this.isCorrectFitLabel.setText("Entered formula is:correct!");
+                      }
+                      else
+                      {
+                         this.isCorrectFitLabel.setText("Entered formula is:incorrect!");
+                      }
+
+                      }
+                      }
+                     }
+                     else
+                     {
+                        this.isCorrectFitLabel.setText("Entered formula is:incorrect!");
+                     }
+
+
+
+               if(this.currentDemonstrationEditor.targetItem==null)
+               {
+                if(correctWords&correct)
+                {
+                this.mainPanel.
+                      setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+
+                this.currentDemonstrationEditor.
+                                        createBranchForwardBySearchAndUpdate();
+
+
+                this.mainPanel.
+                   setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                
+                //we verify the existence of the solution
+                 if(this.currentDemonstrationEditor.haveSolutionForwardChaining())
+                 {
+                   JOptionPane.showMessageDialog
+                    (null,
+                     "You have found a proof using Forward Chaining Strategy!",
+                     "Congratulations!",
+                     JOptionPane.INFORMATION_MESSAGE
+                     );
+                 }
+                }
+                }
+                else
+                {
+                  this.mainPanel.
+                      setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+
+                this.currentDemonstrationEditor.
+                                        createBranchForwardBySearchAndUpdate();
+
+
+                this.mainPanel.
+                   setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
+                //we verify the existence of the solution
+                 if(this.currentDemonstrationEditor.haveSolutionForwardChaining())
+                 {
+                   JOptionPane.showMessageDialog
+                    (null,
+                     "You have found a proof using Forward Chaining Strategy!",
+                     "Congratulations!",
+                     JOptionPane.INFORMATION_MESSAGE
+                     );
+                 }
+                }
+
+
+                }
+
+            
+        
 
           }
-          while(!ok);
+    }//GEN-LAST:event_SearchFitButtonActionPerformed
+
+    private void InsertDirectlyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_InsertDirectlyButtonActionPerformed
+
+        if (this.currentDemonstrationEditor!=null)
+         {
+               if (this.currentDemonstrationEditor.demonstrationStrategyType==1)
+                {
+
+                  Application0 a=(Application0)Application.getInstance();
+                     StyledDocument doc=this.targetStatementFitPane2.getStyledDocument();
+                     Style style=this.targetStatementFitPane2.addStyle("red style", null);
+                     StyleConstants.setForeground(style, Color.red);
+
+                     String inputText=this.targetStatementFitPane2.getText();
+                     StringTokenizer st=new StringTokenizer(inputText," ");
+                     this.targetStatementFitPane2.setText("");//we clear the text
+
+                     List<ConstantAndVariable>  importedFormula = new
+                                                              ArrayList<ConstantAndVariable>();
+                     boolean correctWords=true,correct=true;
+                      int i0=-1;
+                     while(st.hasMoreTokens())
+                     {
+                      String si=st.nextToken();i0++;
+
+                      boolean stringFound=false;
+
+                               Iterator<String> it1=a.frame0.source1.constants.iterator();
+                               while(it1.hasNext())
+                               {
+                                String constI=it1.next();
+                                if(constI.equals(si))
+                                {
+                                 ConstantAndVariable c=new ConstantAndVariable();
+                                 c.constantOrVariable=1;
+                                 c.constantOrVariableText=si;
+                                 importedFormula.add(c);
+                                 stringFound=true;
+                                 break;
+                                }
+                                }
+
+                               Iterator<String> it2=a.frame0.source1.variables.iterator();
+                               while(it2.hasNext())
+                               {
+                                String varI=it2.next();
+                                if(varI.equals(si))
+                                {
+                                 ConstantAndVariable v=new ConstantAndVariable();
+                                 v.constantOrVariable=2;
+                                 v.constantOrVariableText=si;
+                                 if (a.frame0!=null)
+                                  {
+                                  if (a.frame0.source1!=null)
+                                     {
+                                   if (a.frame0.source1.variableAndType!=null)
+                                   {
+
+                                     v.variableClass=a.frame0.source1.variableAndType.
+                                                                  get(v.constantOrVariableText);
+                                   }
+                                   }
+                                   }
+                                 importedFormula.add(v);
+                                 stringFound=true;
+                                 break;
+                                }
+                                }
+
+                     if(!stringFound)
+                     {
+                         try
+                           {
+                            doc.insertString(doc.getLength(), si, style);
+                            doc.insertString(doc.getLength(), " ", null);
+
+                           } catch(BadLocationException e){}
+
+                         correctWords=false;
+                     }
+                     else
+                     {
+                      if((!si.equals("|-"))&(i0==0))
+                       {
+                        try
+                           {
+                            doc.insertString(doc.getLength(), si, style);
+                            doc.insertString(doc.getLength(), " ", null);
+
+                           } catch(BadLocationException e){}
+                        correctWords=false;
+                       }
+                       else
+                       {
+                        try
+                           {
+                            doc.insertString(doc.getLength(), si, null);
+                            doc.insertString(doc.getLength(), " ", null);
+
+                           } catch(BadLocationException e){}
+                        }
+
+                     }
+
+
+                     }
+                     if(correctWords)
+                     {
+
+                       this.targetFitStatement=importedFormula;
+
+                     //we verify syntactic correctness
+
+                      if (targetFitStatement!=null)
+                     {
+                     if (!targetFitStatement.isEmpty())
+                     {
+
+                       SyntacticItem syntacticTree=new SyntacticItem();
+                       correct=a.frame0.source1.verifySyntacticType
+                                                            (
+                                                            targetFitStatement,
+                                                            "wff",
+                                                            1,
+                                                            true,
+                                                            syntacticTree
+                                                            );
+
+                      if (correct)
+                      {
+                         this.isCorrectFitLabel.setText("Entered formula is:correct!");
+                      }
+                      else
+                      {
+                         this.isCorrectFitLabel.setText("Entered formula is:incorrect!");
+                      }
+
+                      }
+                      }
+                     }
+                     else
+                     {
+                        this.isCorrectFitLabel.setText("Entered formula is:incorrect!");
+                     }
 
 
 
-        }
-    }//GEN-LAST:event_fillButtonActionPerformed
+
+
+                if(correctWords&correct)
+                {
+               
+
+
+                this.currentDemonstrationEditor.
+                                           createBranchForwardDirectlyUpdate();
+
+                
+
+                //we verify the existence of the solution
+                 if(this.currentDemonstrationEditor.haveSolutionForwardChaining())
+                 {
+                   JOptionPane.showMessageDialog
+                    (null,
+                     "You have found a proof using Forward Chaining Strategy!",
+                     "Congratulations!",
+                     JOptionPane.INFORMATION_MESSAGE
+                     );
+                 }
+                }
+
+                }
+
+            
+
+
+          }
+    }//GEN-LAST:event_InsertDirectlyButtonActionPerformed
+
+    private void markTargetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_markTargetButtonActionPerformed
+       if(this.currentDemonstrationEditor.selectedDemonstrationItem0!=null)
+       {
+        this.currentDemonstrationEditor.targetItem=
+                this.currentDemonstrationEditor.selectedDemonstrationItem0;
+        this.targetLabel.setText("Marked target is:"+
+                              this.currentDemonstrationEditor.targetItem.name);
+        this.targetStatementFitPane2.setText("");
+       }
+    }//GEN-LAST:event_markTargetButtonActionPerformed
+
+    private void nullTargetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nullTargetButtonActionPerformed
+       if(this.currentDemonstrationEditor.targetItem!=null)
+       {
+        this.currentDemonstrationEditor.targetItem=null;
+        this.targetLabel.setText("Marked target is:null");
+       }
+    }//GEN-LAST:event_nullTargetButtonActionPerformed
+
+    private void textVersionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textVersionButtonActionPerformed
+      if(this.currentDemonstrationEditor!=null)
+      {
+       if(this.currentDemonstrationEditor.demonstrationStrategyType==1)
+       {
+       this.currentDemonstrationEditor.proofTextVersion="";
+       this.currentDemonstrationEditor.displayedHypotheses.clear();
+       this.currentDemonstrationEditor.cleanTheProof();
+       this.currentDemonstrationEditor.
+               generateTextVersionOfProof
+                         (this.currentDemonstrationEditor.demonstrationSource);
+
+       JFrame mainFrame = Application0.getApplication().getMainFrame();
+                   Application0.getApplication().
+                               show(new ProofTextVersionWindow(mainFrame,true));
+
+       }
+      }
+
+    }//GEN-LAST:event_textVersionButtonActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    public javax.swing.JButton InsertDirectlyButton;
+    public javax.swing.JButton SearchFitButton;
     private javax.swing.JButton aboutButton;
     public javax.swing.JButton addExistingStatementButton;
     public javax.swing.JButton addToListButton;
     public javax.swing.JButton branchCreationButton;
     public javax.swing.JButton branchDeletingButton;
+    public javax.swing.JButton checkFitButton;
     private javax.swing.JLabel colors;
     private javax.swing.JPanel editPanel;
     private javax.swing.JButton editVariablesButton;
     private javax.swing.JPanel filesPanel;
     public javax.swing.JTabbedPane filesTab;
-    private javax.swing.JButton fillButton;
+    private javax.swing.JLabel fitLabel1;
+    private javax.swing.JLabel fitLabel2;
+    public javax.swing.JPanel fitPanel;
     private javax.swing.JButton formulaButton;
     private javax.swing.JButton helpButton;
+    public javax.swing.JLabel isCorrectFitLabel;
     public javax.swing.JButton listOfRulesButton;
     private javax.swing.JPanel mainPanel;
+    public javax.swing.JButton markTargetButton;
     private javax.swing.JTabbedPane menuTab;
     private javax.swing.JButton moveDownButton;
     private javax.swing.JButton moveUpButton;
+    public javax.swing.JButton nullTargetButton;
+    public javax.swing.JTextField numberOfHypFitText;
     private javax.swing.JButton openButton;
     private javax.swing.JProgressBar progressBar;
     public javax.swing.JButton propertiesButton;
     private javax.swing.JButton searchButton;
+    public javax.swing.JLabel startStatementFitLabel;
     private javax.swing.JLabel stateAnimationLabel;
     private javax.swing.JLabel stateMessageLabel;
     private javax.swing.JPanel statePanel;
     private javax.swing.JButton syntaxButton;
+    public javax.swing.JLabel targetLabel;
+    public javax.swing.JScrollPane targetStatementFitPane;
+    public javax.swing.JTextPane targetStatementFitPane2;
     public javax.swing.JTextField textField;
+    public javax.swing.JButton textVersionButton;
     private javax.swing.JToolBar toolsBar;
     private javax.swing.JPanel viewPanel;
     // End of variables declaration//GEN-END:variables
@@ -1004,6 +1584,10 @@ public class MainWindow extends FrameView {
     public VariablesListWindow listOfVariablesWindow=null;
     public SyntaxWindow syntaxWindow=null;
 
+    //Rule that fits:  target statement
+    List<ConstantAndVariable> targetFitStatement=
+                                          new ArrayList<ConstantAndVariable>();
+    
    class Filter extends javax.swing.filechooser.FileFilter
    {
        private String description=null;

@@ -15,10 +15,15 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="menuTab" min="-2" pref="107" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
-                  <Component id="toolsBar" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="250" max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="fitPanel" alignment="0" max="32767" attributes="0"/>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="menuTab" min="-2" pref="107" max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
+                          <Component id="toolsBar" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
               </Group>
               <Component id="filesTab" alignment="1" pref="1234" max="32767" attributes="0"/>
           </Group>
@@ -32,7 +37,9 @@
                       <Component id="toolsBar" min="-2" pref="77" max="-2" attributes="1"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="filesTab" pref="550" max="32767" attributes="0"/>
+                  <Component id="fitPanel" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="filesTab" pref="437" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -437,19 +444,233 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="syntaxButtonActionPerformed"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JButton" name="fillButton">
+            <Component class="javax.swing.JButton" name="markTargetButton">
               <Properties>
-                <Property name="foreground" type="java.awt.Color" resourceKey="fillButton.foreground"/>
-                <Property name="text" type="java.lang.String" resourceKey="fillButton.text"/>
-                <Property name="enabled" type="boolean" value="false"/>
+                <Property name="foreground" type="java.awt.Color" resourceKey="markTargetButton.foreground"/>
+                <Property name="text" type="java.lang.String" resourceKey="markTargetButton.text"/>
+                <Property name="name" type="java.lang.String" value="markTargetButton" noResource="true"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="markTargetButtonActionPerformed"/>
+              </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JButton" name="nullTargetButton">
+              <Properties>
+                <Property name="foreground" type="java.awt.Color" resourceKey="nullTargetButton.foreground"/>
+                <Property name="text" type="java.lang.String" resourceKey="nullTargetButton.text"/>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
-                <Property name="name" type="java.lang.String" value="fillButton" noResource="true"/>
+                <Property name="name" type="java.lang.String" value="nullTargetButton" noResource="true"/>
                 <Property name="verticalTextPosition" type="int" value="3"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="fillButtonActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="nullTargetButtonActionPerformed"/>
               </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JButton" name="textVersionButton">
+              <Properties>
+                <Property name="foreground" type="java.awt.Color" resourceKey="textVersionButton.foreground"/>
+                <Property name="text" type="java.lang.String" resourceKey="textVersionButton.text"/>
+                <Property name="name" type="java.lang.String" value="textVersionButton" noResource="true"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="textVersionButtonActionPerformed"/>
+              </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+              </AuxValues>
+            </Component>
+          </SubComponents>
+        </Container>
+        <Container class="javax.swing.JPanel" name="fitPanel">
+          <Properties>
+            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+              <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
+                <TitledBorder title="Find the rule that fits">
+                  <Property name="titleX" resourceKey="fitPanel.border.title"/>
+                  <Property name="color" resourceKey="fitPanel.border.titleColor"/>
+                </TitledBorder>
+              </Border>
+            </Property>
+            <Property name="foreground" type="java.awt.Color" resourceKey="fitPanel.foreground"/>
+            <Property name="name" type="java.lang.String" value="fitPanel" noResource="true"/>
+          </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+          </AuxValues>
+
+          <Layout>
+            <DimensionLayout dim="0">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="targetStatementFitPane" alignment="0" pref="1182" max="32767" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="startStatementFitLabel" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="38" max="-2" attributes="0"/>
+                              <Component id="fitLabel1" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="numberOfHypFitText" min="-2" pref="27" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="fitLabel2" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="84" max="-2" attributes="0"/>
+                              <Component id="isCorrectFitLabel" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="95" max="-2" attributes="0"/>
+                              <Component id="checkFitButton" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="SearchFitButton" min="-2" pref="239" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="InsertDirectlyButton" pref="320" max="32767" attributes="0"/>
+                          </Group>
+                          <Component id="targetLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                  </Group>
+              </Group>
+            </DimensionLayout>
+            <DimensionLayout dim="1">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" alignment="1" attributes="0">
+                      <Component id="targetStatementFitPane" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace pref="15" max="32767" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="startStatementFitLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="fitLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="numberOfHypFitText" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="fitLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="isCorrectFitLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="checkFitButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="SearchFitButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="InsertDirectlyButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="targetLabel" min="-2" max="-2" attributes="0"/>
+                  </Group>
+              </Group>
+            </DimensionLayout>
+          </Layout>
+          <SubComponents>
+            <Component class="javax.swing.JButton" name="SearchFitButton">
+              <Properties>
+                <Property name="foreground" type="java.awt.Color" resourceKey="SearchFitButton.foreground"/>
+                <Property name="text" type="java.lang.String" resourceKey="SearchFitButton.text"/>
+                <Property name="name" type="java.lang.String" value="SearchFitButton" noResource="true"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="SearchFitButtonActionPerformed"/>
+              </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JLabel" name="startStatementFitLabel">
+              <Properties>
+                <Property name="foreground" type="java.awt.Color" resourceKey="startStatementFitLabel.foreground"/>
+                <Property name="text" type="java.lang.String" resourceKey="startStatementFitLabel.text"/>
+                <Property name="name" type="java.lang.String" value="startStatementFitLabel" noResource="true"/>
+              </Properties>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JLabel" name="fitLabel1">
+              <Properties>
+                <Property name="foreground" type="java.awt.Color" resourceKey="fitLabel1.foreground"/>
+                <Property name="text" type="java.lang.String" resourceKey="fitLabel1.text"/>
+                <Property name="name" type="java.lang.String" value="fitLabel1" noResource="true"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JTextField" name="numberOfHypFitText">
+              <Properties>
+                <Property name="text" type="java.lang.String" resourceKey="numberOfHypFitText.text"/>
+                <Property name="name" type="java.lang.String" value="numberOfHypFitText" noResource="true"/>
+              </Properties>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JLabel" name="fitLabel2">
+              <Properties>
+                <Property name="foreground" type="java.awt.Color" resourceKey="fitLabel2.foreground"/>
+                <Property name="text" type="java.lang.String" resourceKey="fitLabel2.text"/>
+                <Property name="name" type="java.lang.String" value="fitLabel2" noResource="true"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="isCorrectFitLabel">
+              <Properties>
+                <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                  <Color blue="ff" green="33" red="0" type="rgb"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="isCorrectFitLabel.text"/>
+                <Property name="name" type="java.lang.String" value="isCorrectFitLabel" noResource="true"/>
+              </Properties>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JButton" name="checkFitButton">
+              <Properties>
+                <Property name="foreground" type="java.awt.Color" resourceKey="checkFitButton.foreground"/>
+                <Property name="text" type="java.lang.String" resourceKey="checkFitButton.text"/>
+                <Property name="name" type="java.lang.String" value="checkFitButton" noResource="true"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="checkFitButtonActionPerformed"/>
+              </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+              </AuxValues>
+            </Component>
+            <Container class="javax.swing.JScrollPane" name="targetStatementFitPane">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="targetStatementFitPane" noResource="true"/>
+              </Properties>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+                <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
+              </AuxValues>
+
+              <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+              <SubComponents>
+                <Component class="javax.swing.JTextPane" name="targetStatementFitPane2">
+                  <Properties>
+                    <Property name="name" type="java.lang.String" value="targetStatementFitPane2" noResource="true"/>
+                  </Properties>
+                  <AuxValues>
+                    <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+                  </AuxValues>
+                </Component>
+              </SubComponents>
+            </Container>
+            <Component class="javax.swing.JButton" name="InsertDirectlyButton">
+              <Properties>
+                <Property name="foreground" type="java.awt.Color" resourceKey="InsertDirectlyButton.foreground"/>
+                <Property name="text" type="java.lang.String" resourceKey="InsertDirectlyButton.text"/>
+                <Property name="name" type="java.lang.String" value="InsertDirectlyButton" noResource="true"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="InsertDirectlyButtonActionPerformed"/>
+              </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JLabel" name="targetLabel">
+              <Properties>
+                <Property name="foreground" type="java.awt.Color" resourceKey="targetLabel.foreground"/>
+                <Property name="text" type="java.lang.String" resourceKey="targetLabel.text"/>
+                <Property name="name" type="java.lang.String" value="targetLabel" noResource="true"/>
+              </Properties>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+              </AuxValues>
             </Component>
           </SubComponents>
         </Container>

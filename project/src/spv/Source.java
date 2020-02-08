@@ -27,6 +27,7 @@ import spv.gen.DemonstrationItem;
 
 import spv.gen.DemonstrationConstants;
 import java.util.Collections;
+import java.util.BitSet;
 import javax.swing.JFrame;
 import org.jdesktop.application.Application;
 import javax.swing.JOptionPane;
@@ -1030,6 +1031,7 @@ public void axiom()
 public void theoremAndDemonstration()
 {
    ParsingItem  dataPreviousParent=new ParsingItem();
+   
 
     if (this.acceptSymbol(Source.T_KEY_SYMBOL,Source.C_P_SYMBOL,Source.F_UNDEFINED))
    {
@@ -1068,6 +1070,8 @@ public void theoremAndDemonstration()
                  //we generate theorem based on captured item
                  this.theoremItemGeneration(capturedItem);
                  //
+                 
+
                  this.changeDataNode(dataPreviousParent);
                  this.addToDataNodeAndChangeNode();
                  /*exit from the loop*/ break;
@@ -1085,6 +1089,8 @@ public void theoremAndDemonstration()
            {
                display(" ["+previousTextSymbol+"] ");
                this.addToDataNode();
+
+              
            }
     else if (acceptSymbol(Source.T_KEY_SYMBOL,Source.C_DOLLAR_POINT,Source.F_UNDEFINED))
              {
@@ -1092,6 +1098,7 @@ public void theoremAndDemonstration()
                  //here will generate the demonstration
                  this.generateDemonstration(capturedItem);
                  this.changeDataNode(dataPreviousParent);
+                 
                 /*exit from the loop*/ break;
              }
     else {
@@ -2283,7 +2290,8 @@ editor.newStatementAndGeneratedVariable.put(editor.selectedDemonstrationItem0.na
 }
 
 
-
+if(editor.selectedDemonstrationItem0!=null)
+{
 //we update the link between statement and the new variables that have content
 String statementName=editor.selectedDemonstrationItem0.name;
 if (variablesToUpdate!=null)
@@ -2302,8 +2310,9 @@ if (variablesToUpdate!=null)
   
  }
  }
-//END update the link between statement and new variables that have content
 
+//END update the link between statement and new variables that have content
+}
 
 return result;
 }
@@ -2652,7 +2661,8 @@ public boolean verifySyntacticType
   //the counter of syntactic definition (class1) visited at the moment t
   int vectorIndex=0;
   int vectorDimension=vector.size();
-
+  //here we store if a rule at vectorIndex is checked (visited)
+  BitSet whatIsVisited=new BitSet(vectorDimension);
   //we verify if in  "statement" exists on "initialPositon"
   //a variable that has the same class with "class1"
 
@@ -2666,6 +2676,16 @@ public boolean verifySyntacticType
  {
 
     List<ConstantAndVariable> definition=null;
+
+     do
+     {
+      if(whatIsVisited.get(vectorIndex)){vectorIndex++;/*we go to next index*/}
+      else {break;}
+      if(vectorIndex>=vectorDimension){ break;}
+     }
+    while(true);
+   if(vectorIndex<vectorDimension)
+   {
     if (vector.get(vectorIndex).getClass().equals(Axiom.class))
     {
         Axiom ax=(Axiom) vector.get(vectorIndex);
@@ -2681,16 +2701,22 @@ public boolean verifySyntacticType
                 syntacticItem.a_p_v=2;//syntactic definition of type theorem
                 syntacticItem.definitionName=tx.name;
             }
+     }
 
     if (definition!=null)
     {
+     //we mark the vectorIntex
+      whatIsVisited.set(vectorIndex);
+     //System.out.println("Rule: "+vectorIndex+":"+ this.displayCV(definition));
     checkItOut=true;
 
     int j=1;//we start form 1,on 0 is the type(wff,set,class,..)
-    int dimension=definition.size();
+    
     do
     {
+     
      ConstantAndVariable cv_j=definition.get(j);
+     boolean localCheck=true;
 
      if (position<statement.size())
      {
@@ -2703,12 +2729,12 @@ public boolean verifySyntacticType
        if(!(cv_j.constantOrVariableText.
                equals(statement.get(position).constantOrVariableText)))
        {
-           checkItOut=false;
+           localCheck=false;
        }
        }
-       else checkItOut=false;
+       else localCheck=false;
 
-       if (checkItOut){lastPosition=position;}
+       if (localCheck){lastPosition=position;}
      }
      //if on j position we have a variable in the definition
      //we verify if on position"position" in the statement follows
@@ -2725,10 +2751,10 @@ public boolean verifySyntacticType
          )
 
          {
-             checkItOut=false;
+             localCheck=false;
          }
 
-         if(checkItOut)
+         if(localCheck)
          {
              //we update the list with contained items
              syntacticItem.containedItems.add(newSyntacticItem);
@@ -2741,6 +2767,70 @@ public boolean verifySyntacticType
      }
       else checkItOut=false;
 
+     if(localCheck)
+     {
+     j++;
+     position++;//we increment position in statement
+     } else
+     {
+      //we search for a new definition that starts identical
+      if(j>1)
+      {
+         List<ConstantAndVariable> definition2=null;
+         byte a_p_v2=0;
+         String name2="";
+         boolean weFound=false;
+        for(int i1=vectorIndex+1;i1<vectorDimension;i1++)
+        {
+
+          if(!whatIsVisited.get(i1))
+          {
+            if (vector.get(i1).getClass().equals(Axiom.class))
+            {
+                Axiom ax=(Axiom) vector.get(i1);
+                definition2=ax.items;
+                a_p_v2=1;//syntactic definition of type axiom
+                name2=ax.name;
+            }
+             else
+             if (vector.get(i1).getClass().equals(Theorem.class))
+            {
+                Theorem tx=(Theorem) vector.get(i1);
+                definition2=tx.items;
+                a_p_v2=2;//syntactic definition of type theorem
+                name2=tx.name;
+            }
+
+            if(definition2!=null)
+            {
+              if(this.startWithCV(j, definition, definition2))
+              {
+               /* System.out.println("Continuation: "+
+                                                   this.displayCV(definition2));
+                * 
+                */
+                weFound=true;
+               definition=definition2;
+               syntacticItem.a_p_v=a_p_v2;
+               syntacticItem.definitionName=name2;
+               //we mark that i1 is visited
+               whatIsVisited.set(i1);
+               break;
+
+              }
+            }
+           
+          }
+
+        }
+        if(!weFound){checkItOut=false;}
+
+
+      }
+      else{checkItOut=false;}
+
+     }
+
      if(!checkItOut)
      {
          //we delete the items contained in "syntacticItem"
@@ -2748,13 +2838,16 @@ public boolean verifySyntacticType
         position=initialPosition;//we return to initial position
          break;//if do not check the syntactic type we exit from do 1
      }
-     j++;
-     position++;//we increment position in statement
-    }while (j<dimension);
+
+
+     
+     if(j>=definition.size()){break;}
+    }while (true);
 
     }
   if(checkItOut) break;//if do not check the syntactic type we exit from do 2
   vectorIndex++;
+  if(vectorIndex>=vectorDimension){ break;}
  }
  while(vectorIndex<vectorDimension);
  }
@@ -2799,6 +2892,50 @@ public boolean verifySyntacticType
  syntacticItem.finalPosition=lastPosition;//we update the final position
  return ok;
 }
+public boolean startWithCV(int j,List<ConstantAndVariable> d1,
+                                                   List<ConstantAndVariable> d2)
+{
+  boolean ok=true;
+  int dimD2=d2.size();
+
+  if(j>dimD2) return false;
+  
+  for(int i=1;i<j;i++)
+  {
+   ConstantAndVariable cv1_i=d1.get(i),cv2_i=d2.get(i);
+
+   if(cv1_i.constantOrVariable==1)
+   {
+       if(cv2_i.constantOrVariable==1)
+       {
+         if(!cv1_i.constantOrVariableText.equals(cv2_i.constantOrVariableText))
+         {
+         ok=false;break;
+         }
+       }
+      else{ok=false;break; }
+   }
+   else if (cv1_i.constantOrVariable==2)
+   {
+       if(cv2_i.constantOrVariable==2)
+       {
+         if(!cv1_i.variableClass.equals(cv2_i.variableClass))
+         {
+         ok=false;break;
+         }
+       }
+       else{ok=false;break; }
+
+   }
+
+  }
+
+
+  return ok;
+
+}
+
+
 public SyntacticItem generateSyntacticTree2(List<ConstantAndVariable> statement,String class1)
 {
 boolean ok=true;
@@ -2810,15 +2947,16 @@ ok=this.verifySyntacticType2(statement,class1,0,true,syntacticItem);
 if (!ok) syntacticItem=null;
 return syntacticItem;
 }
+
 public boolean verifySyntacticType2
 (
   List<ConstantAndVariable> statement,
   String class1,int initialPosition,
   boolean isBase,
   SyntacticItem syntacticItem
- )
+)
 {
- //we update and initialize the syntactic item
+ //update and initialization of syntactic item
  syntacticItem.containedItems=new ArrayList<SyntacticItem>();
  syntacticItem.definitionClass=class1;
  //END update
@@ -2829,17 +2967,17 @@ public boolean verifySyntacticType2
  int lastPosition=0;
 
  List<Object> vector=null;
- vector=this.classListOfDefinitions.get(class1);//search the vector with definitions(class1)
+ vector=this.classListOfDefinitions.get(class1);//find the vector cu class1 definitions
  int position=initialPosition;
- if (statement!=null)
- {
+
  if (vector!=null)
  {
-  //the counter of syntactic definition(class1) visited at the moment t
+  //the counter of syntactic definition (class1) visited at the moment t
   int vectorIndex=0;
   int vectorDimension=vector.size();
-
-  //we verify if in the "statement" exists on "initial position"
+  //here we store if a rule at vectorIndex is checked (visited)
+  BitSet whatIsVisited=new BitSet(vectorDimension);
+  //we verify if in  "statement" exists on "initialPositon"
   //a variable that has the same class with "class1"
 
    //we liberate the contained items
@@ -2852,11 +2990,21 @@ public boolean verifySyntacticType2
  {
 
     List<ConstantAndVariable> definition=null;
+
+     do
+     {
+      if(whatIsVisited.get(vectorIndex)){vectorIndex++;/*we go to next index*/}
+      else {break;}
+      if(vectorIndex>=vectorDimension){ break;}
+     }
+    while(true);
+   if(vectorIndex<vectorDimension)
+   {
     if (vector.get(vectorIndex).getClass().equals(Axiom.class))
     {
         Axiom ax=(Axiom) vector.get(vectorIndex);
         definition=ax.items;
-        syntacticItem.a_p_v=1;//syntactic definition of axiom type
+        syntacticItem.a_p_v=1;//syntactic definition of type axiom
         syntacticItem.definitionName=ax.name;
     }
      else
@@ -2864,24 +3012,30 @@ public boolean verifySyntacticType2
             {
                 Theorem tx=(Theorem) vector.get(vectorIndex);
                 definition=tx.items;
-                syntacticItem.a_p_v=2;//syntactic definition of theorem type
+                syntacticItem.a_p_v=2;//syntactic definition of type theorem
                 syntacticItem.definitionName=tx.name;
             }
+     }
 
     if (definition!=null)
     {
+     //we mark the vectorIntex
+      whatIsVisited.set(vectorIndex);
+     //System.out.println("Rule: "+vectorIndex+":"+ this.displayCV(definition));
     checkItOut=true;
 
-    int j=1;//we start from 1,on0 is type(wff,set,class,..)
-    int dimension=definition.size();
+    int j=1;//we start form 1,on 0 is the type(wff,set,class,..)
+
     do
     {
+
      ConstantAndVariable cv_j=definition.get(j);
+     boolean localCheck=true;
 
      if (position<statement.size())
      {
-      //if on j position we have a constant in definition
-      //it must have an identical constant on position"position" in statement
+      //if  on j position we have a constant in the definition
+      //we must have an identical constant on position "position" in statement
      if ((cv_j.constantOrVariable==1))
      {
        if (statement.get(position).constantOrVariable==1)
@@ -2889,61 +3043,156 @@ public boolean verifySyntacticType2
        if(!(cv_j.constantOrVariableText.
                equals(statement.get(position).constantOrVariableText)))
        {
-           checkItOut=false;
+           localCheck=false;
        }
        }
-       else checkItOut=false;
+       else localCheck=false;
 
-       if (checkItOut){lastPosition=position;}
+       if (localCheck){lastPosition=position;}
      }
-     //if on j position we have a variable in the definiition
-     // we verify if on position "position" in the statement follows
-     //a sequence from class "class1"
+     //if on j position we have a variable in the definition
+     //we verify if on position"position" in the statement follows
+     //sequence from class "class1"
      else if (cv_j.constantOrVariable==2)
      {
          String variableClass="";
          variableClass=cv_j.variableClass;
          SyntacticItem newSyntacticItem=new SyntacticItem();
-         newSyntacticItem.initialPosition=position;//we already set the initial position
-         newSyntacticItem.definitionName="#$^new";
+         newSyntacticItem.initialPosition=position;//we set  already the initial position
          if
          (!this.verifySyntacticType2
                  (statement, variableClass, position,false,newSyntacticItem)
          )
 
          {
-             checkItOut=false;
+             localCheck=false;
          }
 
-         if(checkItOut)
+         if(localCheck)
          {
              //we update the list with contained items
              syntacticItem.containedItems.add(newSyntacticItem);
              newSyntacticItem.fatherItem=syntacticItem;//we make the reverse link
              lastPosition=newSyntacticItem.finalPosition;
-             position=lastPosition;//we update the position
+             position=lastPosition;//we update "position"
              newSyntacticItem.motherVariable=cv_j.constantOrVariableText;
-
          }
      }
 
      }
       else checkItOut=false;
+     
+
+     //if is ok and j is the last item of the rule
+     if(localCheck&checkItOut&(j==definition.size()-1))
+     {
+       int dim1=definition.size(),j2=0;
+
+       for(int i2=1;i2<dim1;i2++)
+       {
+          ConstantAndVariable cv=definition.get(i2);
+          if(cv.constantOrVariable==2)
+          {
+           if(syntacticItem.containedItems!=null)
+           {
+            if(j2<syntacticItem.containedItems.size())
+            {
+            SyntacticItem syn_j2=syntacticItem.containedItems.get(j2);
+            j2++;
+             if(syn_j2!=null)
+             {
+               syn_j2.motherVariable=cv.constantOrVariableText;
+             }
+            }else {System.out.println("Syntactic items j2 outside range!");}
+
+
+           } else {System.out.println("Syntactic items null!");}
+
+          }
+         }
+        }
+
+      if(localCheck)
+     {
+     j++;
+     position++;//we increment position in statement
+     } else
+     {
+      //we search for a new definition that starts identical
+      if(j>1)
+      {
+         List<ConstantAndVariable> definition2=null;
+         byte a_p_v2=0;
+         String name2="";
+         boolean weFound=false;
+        for(int i1=vectorIndex+1;i1<vectorDimension;i1++)
+        {
+
+          if(!whatIsVisited.get(i1))
+          {
+            if (vector.get(i1).getClass().equals(Axiom.class))
+            {
+                Axiom ax=(Axiom) vector.get(i1);
+                definition2=ax.items;
+                a_p_v2=1;//syntactic definition of type axiom
+                name2=ax.name;
+            }
+             else
+             if (vector.get(i1).getClass().equals(Theorem.class))
+            {
+                Theorem tx=(Theorem) vector.get(i1);
+                definition2=tx.items;
+                a_p_v2=2;//syntactic definition of type theorem
+                name2=tx.name;
+            }
+
+            if(definition2!=null)
+            {
+              if(this.startWithCV(j, definition, definition2))
+              {
+               /* System.out.println("Continuation: "+
+                                                   this.displayCV(definition2));
+                *
+                */
+                weFound=true;
+               definition=definition2;
+               syntacticItem.a_p_v=a_p_v2;
+               syntacticItem.definitionName=name2;
+               //we mark that i1 is visited
+               whatIsVisited.set(i1);
+               break;
+
+              }
+            }
+
+          }
+
+        }
+        if(!weFound){checkItOut=false;}
+
+
+      }
+      else{checkItOut=false;}
+
+     }
 
      if(!checkItOut)
      {
-         //we deleted items contained in syntacticItem
+         //we delete the items contained in "syntacticItem"
         syntacticItem.containedItems.clear();
-        position=initialPosition;//we return to the initial position
-         break;//if is not verified the syntactic type we exit from do 1
+        position=initialPosition;//we return to initial position
+         break;//if do not check the syntactic type we exit from do 1
      }
-     j++;
-     position++;//we increment the position in the statement
-    }while (j<dimension);
+
+
+
+     if(j>=definition.size()){break;}
+    }while (true);
 
     }
-  if(checkItOut) break;//if is not verified the syntactic type we exit from do 2
+  if(checkItOut) break;//if do not check the syntactic type we exit from do 2
   vectorIndex++;
+  if(vectorIndex>=vectorDimension){ break;}
  }
  while(vectorIndex<vectorDimension);
  }
@@ -2951,8 +3200,8 @@ public boolean verifySyntacticType2
 
  if (!checkItOut)
  {
-  //we verify if on position "position" we have a variable of class "class1"
-  if (statement.get(position).constantOrVariable==2)
+    //we verify if on position "position" we have a variable of class "class1"
+  if (statement.get(position).constantOrVariable==2)//erorr index 0 size0
           {
              if
                (
@@ -2960,13 +3209,13 @@ public boolean verifySyntacticType2
                )
              {
                  checkItOut = true;
-                 //we memorize the last position from the statement that respects
-                 //the condition to be variable from class "class1"
+                 //we memorize the last position from statement that respect
+                 //the condition to be variable of class "class1"
                  lastPosition=position;
-                 syntacticItem.a_p_v=3;//is a variable
+                 syntacticItem.a_p_v=3;//it is a variable
                  syntacticItem.definitionName=statement.get(position).constantOrVariableText;
-                 
-                 if (checkItOut&isBase&((position+1)<statement.size()))
+
+               if (checkItOut&isBase&((lastPosition+1)<statement.size()))
                     {
                      checkItOut=false;
                     }
@@ -2978,17 +3227,18 @@ public boolean verifySyntacticType2
 
  ok=checkItOut;//if it verifies is ok otherwise is not ok
 
- //if is ok and is base and position+1 is litle than statement createNewBranchBackwardChaining
- //then the statement is not from class "class1"
- if (ok&isBase&((position+1)<statement.size()))
+  //if is ok and is base and last position+1 is litle than statement createNewBranchBackwardChaining
+ //then statement is not from class "class1"
+ if (ok&isBase&((lastPosition+1)<statement.size()))
  {
      ok=false;
  }
- 
+
  syntacticItem.finalPosition=lastPosition;//we update the final position
- }
  return ok;
 }
+
+
 
 public  boolean unifyTemplateWithBase
    (List<ConstantAndVariable> templateList0,List<ConstantAndVariable> baseList0,
@@ -3037,6 +3287,68 @@ if (
 {
  yes=false;
 }
+
+//END verification constants
+}else yes=false;
+
+
+}else yes=false;
+}else yes=false;
+
+
+return yes;//we return true if template and base unify
+}
+
+
+public  boolean unifyTemplateWithTreeBase
+   (List<ConstantAndVariable> templateList0,
+    List<ConstantAndVariable> baseList,
+    SyntacticItem baseSyntacticTree,
+    Map<String,List<ConstantAndVariable>> variableContent)
+{    int max_t=0,max_b=0;
+
+boolean yes=true;
+
+if (templateList0!=null)
+{
+if(baseSyntacticTree!=null)
+{
+max_t=templateList0.size();
+max_b=baseList.size();
+
+if ((max_t>0)&(max_b>0))
+{
+ List<ConstantAndVariable> templateList=null;
+ 
+ templateList=Source.copyTheListOfConstantAndVariable(templateList0);
+ 
+ //we rename all variables from template ex. name --->$lname
+ for (int i=0;i<max_t;i++)
+ {
+     if (templateList.get(i).constantOrVariable==2)
+     {
+         String nameOfVariable=templateList.get(i).constantOrVariableText;
+         nameOfVariable="$l"+nameOfVariable;
+         templateList.get(i).constantOrVariableText=nameOfVariable;
+     }
+ }
+ //END rename
+
+SyntacticItem templateSyntacticTree=this.generateSyntacticTree(templateList);
+/*
+System.out.println("Template-> "+this.displayCV(templateList));
+System.out.println();
+this.displaySyntax(templateSyntacticTree);
+
+System.out.println("Base-> "+this.displayCV(baseList));
+System.out.println();
+this.displaySyntax(baseSyntacticTree);
+
+ * 
+ */
+yes=this.compareTemplateWithBase(templateSyntacticTree, baseSyntacticTree,
+                      variableContent, templateList,baseList);
+
 
 //END verification constants
 }else yes=false;
@@ -5282,7 +5594,35 @@ public String displayCV(List<ConstantAndVariable> list)
     }
    return res; 
  }
+public void displaySyntax(SyntacticItem syn)
+{
 
+ if (syn!=null)
+ {
+   System.out.print(" { ");
+     if (syn.containedItems!=null)
+     {
+       if(!syn.containedItems.isEmpty())
+       {
+           int max=syn.containedItems.size();
+           for(int i=0;i<max;i++)
+           {
+             displaySyntax(syn.containedItems.get(i));
+           }
+
+       }
+     }
+
+  System.out.print(" ["+syn.hub
+          +"|"+syn.repetition
+          +"|"+syn.repetitionNumber
+          +":"+syn.definitionName+"] } ");
+
+
+ }
+
+
+}
 
 
 };

@@ -79,7 +79,7 @@ int maximumHeightBase=0;
 int windowDimension=30;
 int position=0;
 public boolean fullDemonstration1=false;//type of demonstration
-public int demonstrationStrategyType=0;//0- backward chaining 1-forward chaining
+public int demonstrationStrategyType=1;//0- backward chaining 1-forward chaining
 
 //data about demonstration tree
 javax.swing.JButton demonstrationSwitch=null;
@@ -98,6 +98,7 @@ DemonstrationItem demonstrationSource=null;
 List<DemonstrationItem> listOfStatements=new ArrayList<DemonstrationItem>();
 //demonstration item selected by the mouse
 public DemonstrationItem selectedDemonstrationItem0=null;
+public DemonstrationItem targetItem=null;
 int xBeforeDemonstration=0,yBeforeDemonstration=0;
 int baseWidthBeforeDemonstration=0,baseHeightBeforeDemonstration=0;
 int baseMaximumHeightBeforeDemonstration=0;
@@ -189,6 +190,8 @@ int baseMaximumHeightBeforeDemonstration=0;
  public boolean weFoundARepetitionWithIndexAndWePasteProof=false;//forward chaining
  DemonstrationItem demonstrationBeginning=null;//forward chaining
  public int lastHub=0;//last hub
+ public String proofTextVersion="";//text version of the proof
+ public Set<String>  displayedHypotheses=new java.util.HashSet<String>();
  public DemonstrationEditor(
                            Source source1,
                            MainWindow window,
@@ -325,7 +328,15 @@ int baseMaximumHeightBeforeDemonstration=0;
               }
               }
               this.frame.textField.setText(s);
+              this.frame.startStatementFitLabel.setText("Start with:"+
+                      this.selectedDemonstrationItem0.name);
 
+              if(this.selectedDemonstrationItem0.type
+                      ==DemonstrationConstants.NEW_STATEMENT)
+              {
+                  this.frame.markTargetButton.setText("Mark the target:"+
+                          this.selectedDemonstrationItem0.name);
+              }
 
 
          }
@@ -405,10 +416,152 @@ int baseMaximumHeightBeforeDemonstration=0;
         }
        }
      }
+
+   public void generateTextVersionOfProof(DemonstrationItem xItem)
+   {
+    String stepName="",stepAppliedRule="";
+    String stepBaseNames="";
+    String stepStatement="";
+
+    if(xItem!=null)
+    {
+     if(xItem.downLink!=null)
+     {
+      if(xItem.downLink.size()>0)
+      {
+        int dim=xItem.downLink.size();
+       for(int i=0;i<dim;i++)
+       {
+         DemonstrationItem iItem=xItem.downLink.get(i);
+         generateTextVersionOfProof(iItem);
+
+
+       }
+
+      }
+     }
+     if(xItem.type==DemonstrationConstants.NEW_STATEMENT)
+     {
+       //here we get the information to show proof step
+
+       stepName=xItem.name;
+       int dim=xItem.items.size();
+       for(int i=0;i<dim;i++)
+       {
+        stepStatement+=xItem.items.get(i).constantOrVariableText+" ";
+       }
+
+       if(xItem.downLink!=null)
+       {
+        if(!xItem.downLink.isEmpty())
+        {
+         DemonstrationItem yItem=xItem.downLink.get(0);
+         stepAppliedRule=yItem.name;
+
+         if(yItem.downLink!=null)
+         {
+          if(!yItem.downLink.isEmpty())
+          {
+           int dim2=yItem.downLink.size();
+
+           for(int j=0;j<dim2;j++)
+           {
+            DemonstrationItem zItem=yItem.downLink.get(j);
+            if(zItem.downLink!=null)
+            {
+              if(!zItem.downLink.isEmpty())
+              {
+               DemonstrationItem tItem=zItem.downLink.get(0);
+               if((tItem.type==DemonstrationConstants.NEW_STATEMENT)|
+                 (tItem.type==DemonstrationConstants.PROPER_HYPOTHESIS)
+                 )
+               {
+                 if(tItem.repetition)
+                 {
+                  String repetitionName="";
+                  int dimHubs=this.listOfHubs.size();
+                  for(int i1=0;i1<dimHubs;i1++)
+                  {
+                     
+                   HubAndRepetitionItem i1Item=this.listOfHubs.get(i1);
+                   if(tItem.numberOfOrderInCompressedProof
+                                  ==i1Item.item.numberOfOrderInCompressedProof)
+                   {
+                     repetitionName=i1Item.item.name;
+                     break;
+                   }
+                   }
+
+                  stepBaseNames+=repetitionName+",";
+
+                 }
+                 else { stepBaseNames+=tItem.name+",";}
+               }
+              }
+            }
+           }
+
+
+          }
+         }
+
+
+        }
+       }
+       //here we print the proof
+
+      if(!xItem.repetition)
+      {
+       String xStep="";
+       int dim3=stepBaseNames.length();
+       if(dim3>0)
+       {
+        stepBaseNames=stepBaseNames.substring(0, dim3-1);
+       }
+       xStep=stepName+":"+stepBaseNames+":"+stepAppliedRule+"  "+stepStatement;
+       
+       this.proofTextVersion+=xStep+"\n";
+      }
+
+       
+     }
+   else if(xItem.type==DemonstrationConstants.PROPER_HYPOTHESIS)
+   {
+       if(!this.displayedHypotheses.contains(xItem.name))
+       {
+       stepName=xItem.name;
+       Hypothesis hyp=(Hypothesis)xItem.referenceObject;
+       if(hyp!=null)
+       {
+       int dim=hyp.items.size();
+       for(int i=0;i<dim;i++)
+       {
+        stepStatement+=hyp.items.get(i).constantOrVariableText+" ";
+       }
+       }
+
+       //here we print the proof
+
+       String xStep="";
+
+       xStep=stepName+":"+stepStatement;
+
+       this.proofTextVersion+=xStep+"\n";
+       
+       this.displayedHypotheses.add(xItem.name);
+       }
+
+   }
+
+
+
+    }
+
+   }
+
      public void createBranchAndUpdate()
     {
-         if (this.selectedDemonstrationItem0!=null)
-         {
+         
              javax.swing.JPanel basePanel=null;
              basePanel=(javax.swing.JPanel)demonstrationTree.getParent();
           if (basePanel!=null)
@@ -422,6 +575,8 @@ int baseMaximumHeightBeforeDemonstration=0;
                     String name0=frame.nameOfMemorizedItem;
                     if (this.demonstrationStrategyType==0)
                     {
+                      if (this.selectedDemonstrationItem0!=null)
+                       {
                       if(!(this.selectedDemonstrationItem0.repetition))
                       {
                       if (this.selectedDemonstrationItem0.downLink==null)
@@ -451,11 +606,12 @@ int baseMaximumHeightBeforeDemonstration=0;
                        }
                      }
                      }
+
+                     }
                     else
                     {
                      this.createNewBranchForwardChaining
                              (
-                             this.selectedDemonstrationItem0,
                              name0,
                              frame.typeOfMemorizedItem
                              );
@@ -508,9 +664,145 @@ int baseMaximumHeightBeforeDemonstration=0;
                 }
                 //END redisplay demonstration
          }
-         }
+         
     }
-    
+
+   public void createBranchForwardBySearchAndUpdate()
+    {
+          
+             javax.swing.JPanel basePanel=null;
+             basePanel=(javax.swing.JPanel)demonstrationTree.getParent();
+          if (basePanel!=null)
+          {
+
+             if (frame!=null)
+             {
+                    if (this.demonstrationStrategyType==1)
+                    {
+                     this.findRuleForwardChaining(
+                             this.frame.targetFitStatement,
+                             Integer.parseInt
+                                    (this.frame.numberOfHypFitText.getText()));
+
+                     //System.out.println("No.of hyp: "+Integer.parseInt
+                    //              (this.frame.numberOfHypFitText.getText()));
+                    }
+               
+             }
+
+                 //redisplay demonstration
+                 basePanel.remove(demonstrationTree);
+                 //restoration
+                 x=xBeforeDemonstration;
+                 y=yBeforeDemonstration;
+                 referenceWidth=baseWidthBeforeDemonstration;
+                 baseHeight=baseHeightBeforeDemonstration;
+                 maximumHeightBase=baseMaximumHeightBeforeDemonstration;
+                 //END restoration
+                 if (demonstrationSource!=null)
+                {
+                   demonstrationTree=
+                           createDemonstrationTree(demonstrationSource);
+                   Dimension d2=demonstrationTree.getPreferredSize();
+                    width1=d2.width;
+                    height1=d2.height;
+
+                      x=xMargin;
+                      y=y+maximumHeightBase+ySpace;
+                      maximumHeightBase=height1;
+
+                  if (y+height1+ySpace>baseHeight)
+                {
+                      int dist=y+height1+ySpace-baseHeight;
+                    baseHeight=baseHeight+dist;
+                }
+
+                 int width=0;
+                 width=referenceWidth;
+                 if (referenceWidth<width1) width=width1;
+
+                  basePanel.setPreferredSize(
+                       new Dimension(width+10*xSpaceRight,baseHeight));
+                  basePanel.add(demonstrationTree);
+                  demonstrationTree.setBounds(x, y, width1,height1);
+
+                  if(height1>maximumHeightBase) maximumHeightBase=height1;
+                   x=x+width1+xSpace;
+                 //redesign base panel
+                 basePanel.revalidate();
+                 basePanel.repaint();
+                 basePanel.repaint();
+                }
+                //END redisplay demonstration
+         }
+         
+    }
+  public void createBranchForwardDirectlyUpdate()
+    {
+
+             javax.swing.JPanel basePanel=null;
+             basePanel=(javax.swing.JPanel)demonstrationTree.getParent();
+          if (basePanel!=null)
+          {
+
+             if (frame!=null)
+             {
+                    if (this.demonstrationStrategyType==1)
+                    {
+                     this.InsertDirectlyForwardChaining
+                                              (this.frame.targetFitStatement);
+                    
+                    }
+
+             }
+
+                 //redisplay demonstration
+                 basePanel.remove(demonstrationTree);
+                 //restoration
+                 x=xBeforeDemonstration;
+                 y=yBeforeDemonstration;
+                 referenceWidth=baseWidthBeforeDemonstration;
+                 baseHeight=baseHeightBeforeDemonstration;
+                 maximumHeightBase=baseMaximumHeightBeforeDemonstration;
+                 //END restoration
+                 if (demonstrationSource!=null)
+                {
+                   demonstrationTree=
+                           createDemonstrationTree(demonstrationSource);
+                   Dimension d2=demonstrationTree.getPreferredSize();
+                    width1=d2.width;
+                    height1=d2.height;
+
+                      x=xMargin;
+                      y=y+maximumHeightBase+ySpace;
+                      maximumHeightBase=height1;
+
+                  if (y+height1+ySpace>baseHeight)
+                {
+                      int dist=y+height1+ySpace-baseHeight;
+                    baseHeight=baseHeight+dist;
+                }
+
+                 int width=0;
+                 width=referenceWidth;
+                 if (referenceWidth<width1) width=width1;
+
+                  basePanel.setPreferredSize(
+                       new Dimension(width+10*xSpaceRight,baseHeight));
+                  basePanel.add(demonstrationTree);
+                  demonstrationTree.setBounds(x, y, width1,height1);
+
+                  if(height1>maximumHeightBase) maximumHeightBase=height1;
+                   x=x+width1+xSpace;
+                 //redesign base panel
+                 basePanel.revalidate();
+                 basePanel.repaint();
+                 basePanel.repaint();
+                }
+                //END redisplay demonstration
+         }
+
+    }
    public void moveUpFCAndUpdate()
     {
          if (this.selectedDemonstrationItem0!=null)
@@ -837,7 +1129,8 @@ private void createVisualItemTheorem
        //display type of demonstration strategy label
 
          strategyTypeLabel=this.createLabel
-                    (backwardChainingStrategyLabel);
+                    (forwardChainingStrategyLabel);
+         
            Dimension d=strategyTypeLabel.getPreferredSize();
             width1=d.width;
             height1=d.height;
@@ -909,6 +1202,7 @@ private void createVisualItemTheorem
         
       
        //extraction button
+       
        demonstrationExtraction=this.createButton("Extract the proof string Wait");
        demonstrationExtraction.addActionListener(
             new java.awt.event.ActionListener()
@@ -917,7 +1211,7 @@ private void createVisualItemTheorem
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
               demonstrationString="";
-               
+             
                 if(demonstrationStrategyType==0)
                 { //backward chaining
                  if(haveSolutionBackwardChaining())
@@ -1160,7 +1454,7 @@ private void createVisualItemTheorem
 
      
         //automation button
-
+       /*
        automatedSearching=this.createButton("Automated search");
        automatedSearching.addActionListener(
             new java.awt.event.ActionListener()
@@ -1233,7 +1527,9 @@ private void createVisualItemTheorem
 
        stopSearching.setEnabled(false);//we block this buttn
       //END stop searching button
-      
+
+        * 
+        */
         //exit button
       
        exit=this.createButton("Close");
@@ -3112,7 +3408,7 @@ return ok;
 }
 //forward chaining function
 public boolean createNewBranchForwardChaining
-   (DemonstrationItem selectedDemonstrationItem,String foundName,int type)
+   (String foundName,int type)
 {
  boolean   ok=true;
 //link between local variables from matching and their content
@@ -3150,11 +3446,26 @@ int position0=-1;
 int max=-1;
 Axiom xAxiom=a_x;
 //we establish position0 to the demonstration source
+if(this.selectedDemonstrationItem0!=null)
+{
  if (this.demonstrationSource.downLink!=null)
       {
-       position0= this.demonstrationSource.downLink.indexOf(selectedDemonstrationItem);
+       position0= this.demonstrationSource.downLink.indexOf(selectedDemonstrationItem0);
        max=this.demonstrationSource.downLink.size();
       }
+}
+//if target is marked we check if the axiom assertion unifies with the target
+
+if(targetItem!=null)
+{
+ok=this.S.unifyTemplateWithBase
+      (
+      xAxiom.items,
+      targetItem.items,
+      variableAndContent
+      );
+if(!ok){return false;}
+}
 
 // check if the xAxiom items are unified
 // with selectedDemonstrationItem and other n-1 items that it finds
@@ -3179,24 +3490,24 @@ if  (xAxiom.type==2)
 
      if (ok)
     {
-      if ((selectedDemonstrationItem.type==DemonstrationConstants.NEW_STATEMENT)|
-          (selectedDemonstrationItem.type==DemonstrationConstants.NEW_FORWARD_STATEMENT)
+      if ((selectedDemonstrationItem0.type==DemonstrationConstants.NEW_STATEMENT)|
+          (selectedDemonstrationItem0.type==DemonstrationConstants.NEW_FORWARD_STATEMENT)
          )
       {
 
       ok=this.S.unifyTemplateWithBase
      (
       xAxiom.hypotheses.get(0).items,
-      selectedDemonstrationItem.items,
+      selectedDemonstrationItem0.items,
       variableAndContent);
 
       }
 
- else if ((selectedDemonstrationItem.type==DemonstrationConstants.PROPER_HYPOTHESIS)|
-          (selectedDemonstrationItem.type==DemonstrationConstants.PROPER_HYPOTHESIS)
+ else if ((selectedDemonstrationItem0.type==DemonstrationConstants.PROPER_HYPOTHESIS)|
+          (selectedDemonstrationItem0.type==DemonstrationConstants.PROPER_HYPOTHESIS)
          )
       {
-        Hypothesis yHypothesis=(Hypothesis)selectedDemonstrationItem.referenceObject;
+        Hypothesis yHypothesis=(Hypothesis)selectedDemonstrationItem0.referenceObject;
       ok=this.S.unifyTemplateWithBase
      (
       xAxiom.hypotheses.get(0).items,
@@ -3300,10 +3611,14 @@ if (ok)
  //highlight variables that have no content
  Source.generateNewVariablesInGeneral(xAxiom.totalVariables, this, variableAndContent);
 
+ DemonstrationItem newDemonstrationItem=null;
+
+ if(targetItem==null)
+ {
   //we create a new demonstration item and
   //we attach to him other items of demonstration
   //and we create content
- DemonstrationItem newDemonstrationItem= new DemonstrationItem();
+  newDemonstrationItem= new DemonstrationItem();
 
  newDemonstrationItem.items=
                 Source.variablesContentInsertion(xAxiom.items, variableAndContent);
@@ -3331,7 +3646,12 @@ if (ok)
     {
      demonstrationSource.downLink.add(newDemonstrationItem);
     }
- 
+}
+ else
+ {
+   newDemonstrationItem=targetItem;
+ }
+
 DemonstrationItem axiomOrTheoremItemSimpleOrComposed=new DemonstrationItem();
 
 newDemonstrationItem.downLink=new java.util.ArrayList<DemonstrationItem>();
@@ -3436,11 +3756,28 @@ else if (t_x!=null)
   int max=-1;
 Theorem xTheorem=t_x;
 //we establish first the position of selectedDemonstrationItem to the demonstrationSource
+if(this.selectedDemonstrationItem0!=null)
+{
 if (this.demonstrationSource.downLink!=null)
       {
-       position0= this.demonstrationSource.downLink.indexOf(selectedDemonstrationItem);
+       position0= this.demonstrationSource.downLink.indexOf(selectedDemonstrationItem0);
        max=this.demonstrationSource.downLink.size();
       }
+}
+
+if(targetItem!=null)
+{
+ok=this.S.unifyTemplateWithBase
+      (
+      xTheorem.items,
+      targetItem.items,
+      variableAndContent
+      );
+if(!ok){return false;}
+}
+
+
+
 //we verify if unify the items of xTheorem
 //with selectedDemonstrationItem and other n-1 items which it finds
 //in stack after selectedDemonstrationItem
@@ -3463,24 +3800,24 @@ if  (xTheorem.type==2)
 
      if (ok)
     {
-      if ((selectedDemonstrationItem.type==DemonstrationConstants.NEW_STATEMENT)|
-          (selectedDemonstrationItem.type==DemonstrationConstants.NEW_FORWARD_STATEMENT)
+      if ((selectedDemonstrationItem0.type==DemonstrationConstants.NEW_STATEMENT)|
+          (selectedDemonstrationItem0.type==DemonstrationConstants.NEW_FORWARD_STATEMENT)
          )
       {
 
       ok=this.S.unifyTemplateWithBase
      (
       xTheorem.hypotheses.get(0).items,
-      selectedDemonstrationItem.items,
+      selectedDemonstrationItem0.items,
       variableAndContent);
 
       }
 
- else if ((selectedDemonstrationItem.type==DemonstrationConstants.PROPER_HYPOTHESIS)|
-          (selectedDemonstrationItem.type==DemonstrationConstants.PROPER_HYPOTHESIS)
+ else if ((selectedDemonstrationItem0.type==DemonstrationConstants.PROPER_HYPOTHESIS)|
+          (selectedDemonstrationItem0.type==DemonstrationConstants.PROPER_HYPOTHESIS)
          )
       {
-        Hypothesis yHypothesis=(Hypothesis)selectedDemonstrationItem.referenceObject;
+        Hypothesis yHypothesis=(Hypothesis)selectedDemonstrationItem0.referenceObject;
       ok=this.S.unifyTemplateWithBase
      (
       xTheorem.hypotheses.get(0).items,
@@ -3577,10 +3914,14 @@ if (ok)
  //we highlight the variables that do not have content
  Source.generateNewVariablesInGeneral(xTheorem.totalVariables, this, variableAndContent);
 
+ DemonstrationItem newDemonstrationItem=null;
+
+  if (targetItem==null)
+ {
  //we create a demonstration item and
  //we attach at him other demonstration items
  //and we create content
- DemonstrationItem newDemonstrationItem= new DemonstrationItem();
+ newDemonstrationItem= new DemonstrationItem();
 
  newDemonstrationItem.items=
                 Source.variablesContentInsertion(xTheorem.items, variableAndContent);
@@ -3607,7 +3948,11 @@ if (ok)
     {
      demonstrationSource.downLink.add(newDemonstrationItem);
     }
-
+}
+ else
+ {
+  newDemonstrationItem=targetItem;
+ }
  
 DemonstrationItem axiomOrTheoremItemSimpleOrComposed=new DemonstrationItem();
 
@@ -3725,11 +4070,14 @@ int position0=-1;
 
 if (demonstrationSource!=null)
 {
+   if(this.selectedDemonstrationItem0!=null)
+   {
     if (demonstrationSource.downLink!=null)
     {
      
-     position0=demonstrationSource.downLink.indexOf(selectedDemonstrationItem);
+     position0=demonstrationSource.downLink.indexOf(selectedDemonstrationItem0);
     }
+   }
 
 }
 if(demonstrationSource.downLink==null)
@@ -3760,6 +4108,570 @@ hypothesisItem.referenceObject=xHypothesis;
 //END
 
 return ok;
+}
+
+//find rule that fits and apply rule forward chaining
+public boolean findRuleForwardChaining
+   (
+    List<ConstantAndVariable> target,
+    int numberOfHypotheses)
+{
+ boolean   ok=false;
+//link between local variables from matching and their content
+Map<String,List<ConstantAndVariable>>   variableAndContent=null;
+variableAndContent= new java.util.HashMap<String,java.util.List<ConstantAndVariable>>();
+
+int position0=-1;
+int max=-1;
+//we establish position0 to the demonstration source
+if(this.selectedDemonstrationItem0!=null)
+{
+
+ if (this.demonstrationSource.downLink!=null)
+      {
+       position0= this.demonstrationSource.downLink.
+               indexOf(this.selectedDemonstrationItem0);
+       max=this.demonstrationSource.downLink.size();
+      }
+}
+if(numberOfHypotheses>0)
+{
+  if (position0==-1) {return false;}
+}
+
+if (numberOfHypotheses<0) {return false;}
+
+if(numberOfHypotheses>0)
+{
+if ((position0+numberOfHypotheses)>max)
+    {
+        return false;
+    }
+}
+if(this.targetItem!=null)
+{
+ target=this.targetItem.items;
+}
+SyntacticItem targetTree=this.S.generateSyntacticTree(target);
+
+List<List<ConstantAndVariable>> listOfBaseStatements=
+                                    new ArrayList<List<ConstantAndVariable>>();
+List<SyntacticItem> listOfBaseTreeStatements=new ArrayList<SyntacticItem>();
+
+//we memorize the base statements
+//and generate(and memorize) their syntactic trees
+  if(numberOfHypotheses>0)
+  {
+  int i1=0;
+  do
+  {
+
+   DemonstrationItem stackItemPositionI1=
+             demonstrationSource.downLink.get(position0+i1);
+  if(stackItemPositionI1!=null)
+  {
+   if ((stackItemPositionI1.type==DemonstrationConstants.NEW_STATEMENT)|
+      (stackItemPositionI1.type==DemonstrationConstants.NEW_FORWARD_STATEMENT)
+       )
+      {
+          listOfBaseStatements.add(stackItemPositionI1.items);
+          listOfBaseTreeStatements.add
+             (this.S.generateSyntacticTree(stackItemPositionI1.items));
+      }
+
+ else if ((stackItemPositionI1.type==DemonstrationConstants.PROPER_HYPOTHESIS)|
+          (stackItemPositionI1.type==DemonstrationConstants.PROPER_HYPOTHESIS)
+         )
+      {
+        Hypothesis yHypothesis=(Hypothesis)stackItemPositionI1.referenceObject;
+        listOfBaseStatements.add(yHypothesis.items);
+        listOfBaseTreeStatements.add
+                      (this.S.generateSyntacticTree(yHypothesis.items));
+      }
+    }
+
+  
+  if (i1==(numberOfHypotheses-1)) break;
+  i1++;
+  }
+  while (true);
+  }
+
+
+
+Axiom xAxiom=null;
+Theorem xTheorem=null;
+Application0 a=(Application0)Application.getInstance();
+//syntactic tree of the target afirmation
+
+
+ 
+//here we have axioms
+
+
+       if(a.frame0.source1.axioms!=null)
+        {
+          Iterator<String> it=a.frame0.source1.axioms.keySet().iterator();
+           while(it.hasNext())
+           {
+            String name=it.next();
+            xAxiom=(Axiom)a.frame0.source1.axioms.get(name);
+            String firstCV=xAxiom.items.get(0).constantOrVariableText;
+            int n=xAxiom.hypotheses.size();
+            if((firstCV.equals("|-"))&(n==numberOfHypotheses))
+            {
+             variableAndContent.clear();
+             ok=true;
+             ok=this.S.unifyTemplateWithTreeBase(xAxiom.items,
+                     target,
+                     targetTree,
+                     variableAndContent);
+             if (ok)
+             {
+             int max1=listOfBaseStatements.size();
+             for(int i=0;i<max1;i++)
+             {
+              List<ConstantAndVariable> iItem=listOfBaseStatements.get(i);
+              SyntacticItem iTree=listOfBaseTreeStatements.get(i);
+              List<ConstantAndVariable> iHyp=xAxiom.hypotheses.get(i).items;
+              ok=this.S.unifyTemplateWithTreeBase(iHyp,
+                      iItem,
+                      iTree,
+                      variableAndContent);
+              if(!ok){break;}
+
+             }
+             }
+            }
+
+            if(ok){break;}
+            }
+        }
+
+       
+
+      if (ok)
+            {
+          if(numberOfHypotheses>0)
+          {
+         //if it is ok
+         //we memorize the target items where it will apply
+         //composed axioma or composed theorem
+         stackSelectedItems.clear();
+         stackItemsCursor=0;
+            for (int j=position0;j<=(position0+numberOfHypotheses-1);j++)
+            {
+             //we add the item in stackSelectedItems
+             stackSelectedItems.add(this.demonstrationSource.downLink.get(j));
+
+            }
+            //reverse the list and remove the links
+           for (int j=(position0+numberOfHypotheses-1);j>=position0;j--)
+           {
+             //remove the item from subordinate of demonstrationSource
+             this.demonstrationSource.downLink.remove(j);
+            }
+            }
+
+            }
+
+//if the axiom is composed and the above unifications have been achieved
+//or if it's simply a simple axiom
+//we're going in here
+if (ok)
+{
+
+ //we solve 'the equations' of variables from substitution variableAndContent
+ variableAndContent=Source.resolveVariableContent(variableAndContent, this);
+ //END solve 'the equations'
+
+ //highlight variables that have no content
+ Source.generateNewVariablesInGeneral(xAxiom.totalVariables, this, variableAndContent);
+ DemonstrationItem newDemonstrationItem=null;
+  if(this.targetItem==null)
+  {
+  //we create a new demonstration item and
+  //we attach to him other items of demonstration
+  //and we paste the  content from the target
+ newDemonstrationItem= new DemonstrationItem();
+
+ newDemonstrationItem.items=
+                Source.copyTheListOfConstantAndVariable(target);
+  //we establish the type of the demonstration item
+ newDemonstrationItem.type=DemonstrationConstants.NEW_STATEMENT;
+ //we generate the name of the new statement
+ //and associate the name with the content of the statement
+ String newStatementName1="$a"+this.numberOfOrderNewStatements;
+ this.numberOfOrderNewStatements++;
+ this.newStatementAndContentPhaseZero.put
+               (newStatementName1,Source.copyTheListOfConstantAndVariable(newDemonstrationItem.items));
+ newDemonstrationItem.name=newStatementName1;
+
+  //we add on position position0+1 the new demonstrationItem
+  if (demonstrationSource.downLink==null)
+  {
+      demonstrationSource.downLink=new ArrayList<DemonstrationItem>();
+  }
+
+    if(position0>-1)
+    {
+      demonstrationSource.downLink.add(position0,newDemonstrationItem);
+    }
+    else
+    {
+     demonstrationSource.downLink.add(newDemonstrationItem);
+    }
+
+ }
+ else
+ {
+   newDemonstrationItem=targetItem;
+ }
+DemonstrationItem axiomOrTheoremItemSimpleOrComposed=new DemonstrationItem();
+
+newDemonstrationItem.downLink=new java.util.ArrayList<DemonstrationItem>();
+newDemonstrationItem.downLink.add(axiomOrTheoremItemSimpleOrComposed);
+axiomOrTheoremItemSimpleOrComposed.aboveLink=newDemonstrationItem;//we create double pointer
+
+if (xAxiom.type==1)
+{axiomOrTheoremItemSimpleOrComposed.type=DemonstrationConstants.SIMPLE_AXIOM;}//simple axiom
+else if (xAxiom.type==2)
+{axiomOrTheoremItemSimpleOrComposed.type=DemonstrationConstants.AXIOM_FROM_COMPOSED_AXIOM;
+
+}//axiom from composed axiom
+axiomOrTheoremItemSimpleOrComposed.name=xAxiom.name;
+axiomOrTheoremItemSimpleOrComposed.undername=xAxiom.name;
+axiomOrTheoremItemSimpleOrComposed.referenceObject=xAxiom;
+
+//we attach to the composed axiom hypotheses and associated variables
+axiomOrTheoremItemSimpleOrComposed.downLink=new java.util.ArrayList<DemonstrationItem>();
+
+int dimension=0,ii=0;
+
+//we check if the axiom has hypotheses
+if (xAxiom.hypotheses!=null)
+{
+dimension=xAxiom.hypotheses.size();
+}
+
+if ((dimension)>0)
+{
+
+//here we create an empty list of given dimension
+ii=0;DemonstrationItem xDemonstration=null;
+do {
+xDemonstration=new DemonstrationItem();
+axiomOrTheoremItemSimpleOrComposed.downLink.add( xDemonstration );
+xDemonstration.aboveLink=axiomOrTheoremItemSimpleOrComposed;
+ii++;
+}while(ii<dimension);
+//we go back to the hypotheses of xAxiom
+ii=dimension-1;
+stackItemsCursor=stackSelectedItems.size()-1;
+
+DemonstrationItem baseDemonstration=null;
+xDemonstration=null; Hypothesis h_x=null;
+
+
+do
+{
+if (ii>=0) {
+            xDemonstration=axiomOrTheoremItemSimpleOrComposed.downLink.get(ii);
+            h_x=xAxiom.hypotheses.get(ii);
+            ii--;
+           }
+    else {
+          xDemonstration=null;
+         }
+
+if (xDemonstration!=null)
+{
+ if(h_x!=null)
+{
+xDemonstration.type=DemonstrationConstants.HYPOTHESIS_FROM_COMPOSED_AXIOM;//hypothesis from composed axiom
+xDemonstration.name=h_x.name;
+xDemonstration.referenceObject=h_x;
+xDemonstration.numberOfOrderInCompressedProof=0;
+}
+//we create a base which will have included a new statement
+//or a syntactic statement of type wff,set,class
+baseDemonstration= stackSelectedItems.get(stackItemsCursor);
+stackItemsCursor--;
+
+//we establish double pointer
+xDemonstration.downLink=new java.util.ArrayList<DemonstrationItem>();
+xDemonstration.downLink.add(baseDemonstration);
+baseDemonstration.aboveLink=xDemonstration;
+//we modify the values of xDemonstration
+}
+xDemonstration=null;
+
+}while (ii>=0);
+
+// walk through the tree
+// generate the new statements
+
+xDemonstration=null;baseDemonstration=null;ii=00;
+
+
+}
+
+
+return true;
+}//END verification matching
+//END 'axioms'
+
+
+
+//here we have theorems
+ok=false;
+
+       if(a.frame0.source1.theorems!=null)
+        {
+          Iterator<String> it=a.frame0.source1.theorems.keySet().iterator();
+           while(it.hasNext())
+           {
+            String name=it.next();
+             xTheorem=(Theorem)a.frame0.source1.theorems.get(name);
+             String firstCV=xTheorem.items.get(0).constantOrVariableText;
+            int n=xTheorem.hypotheses.size();
+            if((firstCV.equals("|-"))&(n==numberOfHypotheses))
+            {
+             variableAndContent.clear();
+             ok=true;
+             ok=this.S.unifyTemplateWithTreeBase(xTheorem.items,
+                     target,
+                     targetTree,
+                     variableAndContent);
+             if (ok)
+             {
+             int max1=listOfBaseStatements.size();
+             for(int i=0;i<max1;i++)
+             {
+              List<ConstantAndVariable> iItem=listOfBaseStatements.get(i);
+              SyntacticItem iTree=listOfBaseTreeStatements.get(i);
+              List<ConstantAndVariable> iHyp=xTheorem.hypotheses.get(i).items;
+              ok=this.S.unifyTemplateWithTreeBase(iHyp,
+                      iItem,
+                      iTree,
+                      variableAndContent);
+              if(!ok){break;}
+
+             }
+             }
+            }
+
+            if(ok){break;}
+
+
+           }
+        }
+
+
+
+  
+    
+
+     
+     
+      
+
+      if (ok)
+            {
+          if(numberOfHypotheses>0)
+           {
+        //if it is ok
+        //we memorize the target items where it will apply
+        //composed axioma or composed theorem
+         stackSelectedItems.clear();
+         stackItemsCursor=0;
+             for (int j=position0;j<=(position0+numberOfHypotheses-1);j++)
+            {
+             //we add the item to the stackSelectedItems---error out of bounds
+             stackSelectedItems.add(this.demonstrationSource.downLink.get(j));
+
+            }
+            //we go back the list and remove the links
+           for (int j=(position0+numberOfHypotheses-1);j>=position0;j--)
+           {
+            //we remove the item from subordination of demonstrationSource
+             this.demonstrationSource.downLink.remove(j);
+            }
+            }
+            }
+
+
+
+// if it is the complex theorem and the above unifications have been achieved
+// we're going in here
+if (ok)
+{
+
+ //we solve 'the equation' of variables from variableAndContent substitution
+ variableAndContent=Source.resolveVariableContent(variableAndContent, this);
+ //END solve 'the equations'
+
+ //we highlight the variables that do not have content
+ Source.generateNewVariablesInGeneral(xTheorem.totalVariables, this, variableAndContent);
+ DemonstrationItem newDemonstrationItem=null;
+ if(this.targetItem==null)
+  {
+ //we create a demonstration item and
+ //we attach at him other demonstration items
+ //and we create content
+ newDemonstrationItem= new DemonstrationItem();
+
+ newDemonstrationItem.items=
+                Source.copyTheListOfConstantAndVariable(target);
+  //we establish the type of demonstration item
+ newDemonstrationItem.type=DemonstrationConstants.NEW_STATEMENT;
+ //we generate the name of new statement and we associate the name with statement content
+ String newStatementName1="$a"+this.numberOfOrderNewStatements;
+ this.numberOfOrderNewStatements++;
+ this.newStatementAndContentPhaseZero.put
+               (newStatementName1,Source.copyTheListOfConstantAndVariable(newDemonstrationItem.items));
+ newDemonstrationItem.name=newStatementName1;
+
+   //we add on position position0+1 the new demonstration item
+  if (demonstrationSource.downLink==null)
+  {
+      demonstrationSource.downLink=new ArrayList<DemonstrationItem>();
+  }
+
+ if(position0>-1)
+    {
+      demonstrationSource.downLink.add(position0,newDemonstrationItem);
+    }
+ else
+    {
+     demonstrationSource.downLink.add(newDemonstrationItem);
+    }
+    }
+ else
+ {
+     newDemonstrationItem=targetItem;
+ }
+
+DemonstrationItem axiomOrTheoremItemSimpleOrComposed=new DemonstrationItem();
+
+newDemonstrationItem.downLink=new java.util.ArrayList<DemonstrationItem>();
+newDemonstrationItem.downLink.add(axiomOrTheoremItemSimpleOrComposed);
+axiomOrTheoremItemSimpleOrComposed.aboveLink=newDemonstrationItem;//we create double pointer
+
+if (xTheorem.type==1)
+{axiomOrTheoremItemSimpleOrComposed.type=DemonstrationConstants.SIMPLE_THEOREM;}//simple theorem
+else if (xTheorem.type==2)
+{axiomOrTheoremItemSimpleOrComposed.type=DemonstrationConstants.THEOREM_FROM_COMPOSED_THEOREM;
+
+}//theorem from composed theorem
+axiomOrTheoremItemSimpleOrComposed.name=xTheorem.name;
+axiomOrTheoremItemSimpleOrComposed.undername=xTheorem.name;
+axiomOrTheoremItemSimpleOrComposed.referenceObject=xTheorem;
+
+//we attach to the composed theorem the associated hypotheses and variables
+axiomOrTheoremItemSimpleOrComposed.downLink=new java.util.ArrayList<DemonstrationItem>();
+
+int dimension=0,ii=0;
+
+//we verify if the theorem has hypotheses
+if (xTheorem.hypotheses!=null)
+{
+dimension=xTheorem.hypotheses.size();
+}
+
+
+if ((dimension)>0)
+{
+//here we create an empty list of given dimension
+ii=0;DemonstrationItem xDemonstration=null;
+do {
+xDemonstration=new DemonstrationItem();
+axiomOrTheoremItemSimpleOrComposed.downLink.add( xDemonstration );
+xDemonstration.aboveLink=axiomOrTheoremItemSimpleOrComposed;
+ii++;
+}while(ii<dimension);
+
+//we go back through the hypotheses and total variables of xTheorem
+ii=dimension-1;
+stackItemsCursor=stackSelectedItems.size()-1;
+Hypothesis h_x=null;DemonstrationItem baseDemonstration=null;
+xDemonstration=null;
+do
+{
+if (ii>=0) {
+             xDemonstration=axiomOrTheoremItemSimpleOrComposed.downLink.get(ii);
+             h_x=xTheorem.hypotheses.get(ii);
+             ii--;
+           }
+else {xDemonstration=null;}
+
+if (xDemonstration!=null)
+{
+if (h_x!=null)
+{
+xDemonstration.type=DemonstrationConstants.HYPOTHESIS_FROM_COMPOSED_AXIOM;//ipoteza din axioma compusa
+xDemonstration.name=h_x.name;
+xDemonstration.referenceObject=h_x;
+xDemonstration.numberOfOrderInCompressedProof=0;
+}
+//we create a base which will have included a new statement
+//or a syntactic statement of type:wff,set,class
+baseDemonstration=stackSelectedItems.get(stackItemsCursor);
+stackItemsCursor--;
+
+//we establish double pointer
+xDemonstration.downLink=new java.util.ArrayList<DemonstrationItem>();
+xDemonstration.downLink.add(baseDemonstration);
+baseDemonstration.aboveLink=xDemonstration;
+//we modify the values of xDemonstration
+}
+
+xDemonstration=null; h_x=null;
+
+}while (ii>=0);
+
+//we go through the tree
+//we generate the new statements
+
+}
+
+}//END verification matching
+//END 'theorems'
+
+
+
+
+//END
+
+return ok;
+}
+
+public void InsertDirectlyForwardChaining
+   ( List<ConstantAndVariable> target)
+{
+  //we create a new demonstration item and
+  //and we paste the  content from the target
+ DemonstrationItem newDemonstrationItem= new DemonstrationItem();
+
+ newDemonstrationItem.items=
+                Source.copyTheListOfConstantAndVariable(target);
+  //we establish the type of the demonstration item
+ newDemonstrationItem.type=DemonstrationConstants.NEW_STATEMENT;
+ //we generate the name of the new statement
+ //and associate the name with the content of the statement
+ String newStatementName1="$a"+this.numberOfOrderNewStatements;
+ this.numberOfOrderNewStatements++;
+ this.newStatementAndContentPhaseZero.put
+               (newStatementName1,Source.copyTheListOfConstantAndVariable(newDemonstrationItem.items));
+ newDemonstrationItem.name=newStatementName1;
+
+  //we add on position position0+1 the new demonstrationItem
+  if (demonstrationSource.downLink==null)
+  {
+      demonstrationSource.downLink=new ArrayList<DemonstrationItem>();
+  }
+    
+     demonstrationSource.downLink.add(newDemonstrationItem);
 }
 
 public void reUpdateDemonstrationBackwardChaining()
@@ -3911,6 +4823,7 @@ public boolean haveSolutionBackwardChaining()
 public boolean haveSolutionForwardChaining()
 {
  boolean ok=false;
+ DemonstrationItem ProofSource=null;
   if (this.demonstrationSource.downLink!=null)
   {
     if(!demonstrationSource.downLink.isEmpty())
@@ -3925,11 +4838,20 @@ public boolean haveSolutionForwardChaining()
          )
       {
        ok=true;
+       ProofSource=demonstrationSource.downLink.get(i);
        break;
       }
      }
 
     }
+  }
+
+  if(ok)
+  {
+   if(this.existNonTerminalLeaf(ProofSource))
+   {
+     ok=false;
+   }
   }
 
  return ok;
@@ -4575,7 +5497,16 @@ public void treeReorganization(SyntacticItem syntacticItem)
     }
     syntacticItem.containedItems=null;
     syntacticItem.containedItems=list;//we replace with the new order
-    
+
+    int max2=syntacticItem.containedItems.size();
+    if(max2!=maximumItems)
+    {
+     System.out.println("Diff. in no. of syn. items:"
+                                                +syntacticItem.definitionName);
+    }
+
+
+
     if(syntacticItem.containedItems!=null)
     {
      int max=syntacticItem.containedItems.size();
@@ -6668,6 +7599,25 @@ public void displaySyntax(SyntacticItem syn)
  }
 
 
+}
+
+public void cleanTheProof()
+{
+  // do the cleaning before a new crossing
+    numberOfHubs=0;
+    numberOfHubs2=0;
+    listOfHubs.clear();
+    listOfRepetitions.clear();
+    vector_a_p.clear();
+
+
+    findHubsAndRepetitions(demonstrationSource);
+    recoverNewHubs();
+    verifyIfRepetitionIsValid();
+    crossingRenumberingHubs(demonstrationSource);
+    reupdateDemonstrationTree();
+
+                  
 }
 
 }

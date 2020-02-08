@@ -928,10 +928,10 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
      List<ConstantAndVariable>  importedFormula = new
                                               ArrayList<ConstantAndVariable>();
      boolean correctWords=true;
-     
+     int i0=-1;
      while(st.hasMoreTokens())
      {
-      String si=st.nextToken();
+      String si=st.nextToken();i0++;
      
       boolean stringFound=false;
 
@@ -990,13 +990,26 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
      }
      else
      {
+       if((!si.equals("|-"))&(i0==0))
+       {
+        try
+           {
+            doc.insertString(doc.getLength(), si, style);
+            doc.insertString(doc.getLength(), " ", null);
 
+           } catch(BadLocationException e){}
+        correctWords=false;
+       }
+       else
+       {
         try
            {
             doc.insertString(doc.getLength(), si, null);
             doc.insertString(doc.getLength(), " ", null);
 
            } catch(BadLocationException e){}
+        }
+
      }
 
 
@@ -1054,7 +1067,7 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
                                             (
                                             formulaContent,
                                             "wff",
-                                            0,
+                                            1,
                                             true,
                                             syntacticTree
                                             );
@@ -1071,6 +1084,10 @@ public class FormulaEditorWindow extends javax.swing.JDialog {
       }
       }
      }
+      else
+       {
+         this.correctnessLabel.setText("Entered formula is:incorrect!");
+       }
 
 
 

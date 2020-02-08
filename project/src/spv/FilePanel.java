@@ -260,7 +260,7 @@ public class FilePanel extends javax.swing.JPanel
             while (true);
         mainTree1.setAutoscrolls(true);
         summaryPanel.setViewportView(mainTree1);
-        updateContentPanel(loadInitialContent());
+        //updateContentPanel(loadInitialContent());
 
     }
       public void updateContentPanel(javax.swing.JPanel panel)
@@ -1944,6 +1944,18 @@ public javax.swing.JTree createDemonstrationTree(DemonstrationItem demonstration
    tree.setRowHeight(50);
 
    int dimension2=0,dimension=tree.getRowCount();
+
+   //we expand only  first row
+   /* if(dimension>1)
+        {
+               tree.expandRow(0);
+               tree.expandRow(1);
+        }
+
+    *
+    */
+
+   
    do{
 
     for (int i=0;i<dimension;i++)
@@ -1959,6 +1971,11 @@ public javax.swing.JTree createDemonstrationTree(DemonstrationItem demonstration
     if (dimension2==dimension) break;
     dimension=dimension2;
    } while (true);
+
+
+   
+
+   
 
     return tree;
 }
